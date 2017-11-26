@@ -25,7 +25,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
@@ -36,7 +35,6 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 //import com.badlogic.gdx.physics.box2d.FixtureDef;
 //import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
 
 public class BoxMap extends ApplicationAdapter
 {
@@ -55,6 +53,7 @@ public class BoxMap extends ApplicationAdapter
 
   private Texture libgdxTexture, entitiesBigTexture, mechaTexture;
   private TextureRegion entityPlayerRegion;
+  private TextureRegion obstacleRegion;
 
   private Animation<TextureRegion> animation;
 
@@ -64,7 +63,8 @@ public class BoxMap extends ApplicationAdapter
   private World world;
   private Box2DDebugRenderer debugRenderer;
 
-  private BoxEntityFactory boxEntityFactory;
+//  private BoxEntityFactory boxEntityFactory;
+  private BoxEntityFactory2 boxEntityFactory;
   
   private TiledMap map; 
   private TiledMapRenderer mapRenderer;
@@ -86,7 +86,10 @@ public class BoxMap extends ApplicationAdapter
     world = new World(new Vector2(0, 0), true);
     world.setContactListener(new BoxMapContactListener());
 
-    boxEntityFactory = new BoxEntityFactory();
+//    boxEntityFactory = new BoxEntityFactory();
+    boxEntityFactory = new BoxEntityFactory2(this);
+    
+    
     
     // Renderer / Cameras
     debugRenderer = new Box2DDebugRenderer();
@@ -106,7 +109,7 @@ public class BoxMap extends ApplicationAdapter
     // libgdxTexture = new Texture(Gdx.files.internal("data/libgdx.png"));
     libgdxTexture = assetManager.get(TEXTURE_LIBGDX);
     libgdxTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-    TextureRegion region = new TextureRegion(libgdxTexture, 0, 0, 512, 275);
+    obstacleRegion = new TextureRegion(libgdxTexture, 0, 0, 512, 275);
 
     // entitiesBigTexture = new
     // Texture(Gdx.files.internal("data/entities-big.png"));
@@ -135,69 +138,18 @@ public class BoxMap extends ApplicationAdapter
     mapRenderer = new OrthogonalTiledMapRenderer(map, 1f / 1f);
     mapRenderer.setView(cameraSprites);
     
-    MapObjects mapObjects = map.getLayers().get(1).getObjects();   
-    Array<MapProperties> playersProperties = new Array<MapProperties>();
-    Array<MapProperties> enemiesProperties = new Array<MapProperties>();
-    Array<MapProperties> waypointProperties = new Array<MapProperties>();
-    
-    for (MapObject mapObject : mapObjects)
+
+    //Erzeuge Entities aus der Map
+    boxEntities = new ArrayList<BoxEntity>();
+    waypoints = new ArrayList<Waypoint>();
+    for (MapObject mapObject : map.getLayers().get(1).getObjects())
     {
       MapProperties mapProperties = mapObject.getProperties();
-      
-      if ("player1".equals(mapProperties.get("type", String.class))) 
-      {
-        playersProperties.add(mapProperties);
-      }
-      else if ("enemy1".equals(mapProperties.get("type", String.class))) 
-      {
-        enemiesProperties.add(mapProperties);
-      }
-      else if ("waypoint".equals(mapProperties.get("type", String.class))) 
-      {
-        waypointProperties.add(mapProperties);
-      }
-    }   
-    
-    
-    
-    
-    
-    
-    
-    boxEntities = new ArrayList<BoxEntity>();
-
-    // Ein Spieler
-    boxEntityFactory.defineBodyDef(BoxEntityFactory.BOXTYPE_PLAYER);
-    
-    for (MapProperties mapProperties : playersProperties)
-    {
-      boxEntities.add(new Player(this, mapProperties));
-    }    
-    
-    // Beliebig viele enemies
-    boxEntityFactory.defineBodyDef(BoxEntityFactory.BOXTYPE_ENEMY);
-    
-    for (MapProperties mapProperties : enemiesProperties)
-    {
-      boxEntities.add(new Enemy(this, mapProperties));
-    }   
-    
-    boxEntityFactory.defineBodyDef(BoxEntityFactory.BOXTYPE_WAYPOINT);
-    // Beliebig viele Waypoints, zwischen denen die Entities hin- und hertuckern
-    waypoints = new ArrayList<Waypoint>();
-    
-    for (MapProperties mapProperties : waypointProperties)
-    {
-      waypoints.add(new Waypoint(this, mapProperties));
+      if("waypoint".equals(mapProperties.get("type")))
+        waypoints.add((Waypoint)boxEntityFactory.createEntity(mapProperties));
+      else 
+        boxEntities.add(boxEntityFactory.createEntity(mapProperties)); 
     }
-    
-    
-    
-
-    boxEntityFactory.defineBodyDef(BoxEntityFactory.BOXTYPE_OBSTACLE);
-    // Hindernisse (statisch)
-    boxEntities.add(new Obstacle(this, 16, 4, region));
-    boxEntities.add(new Obstacle(this, 18, 8, region));
 
     // Jedem Enemy initial einen Waypoint zuweisen
     for (BoxEntity boxEntity : boxEntities)
@@ -253,7 +205,7 @@ public class BoxMap extends ApplicationAdapter
     {
       boxEntity.render(batch);
     }
-
+    
     //Render debug messages
     debugOutput.render(batch);
 
@@ -262,6 +214,7 @@ public class BoxMap extends ApplicationAdapter
     shapeRenderer.setProjectionMatrix(cameraSprites.combined);
     shapeRenderer.begin(ShapeType.Line);
 
+    
     for (int i = 0; i < waypoints.size() - 1; i++)
     {
       shapeRenderer.line(waypoints.get(i).getPosition().scl(32), waypoints.get(i + 1).getPosition().scl(32));
@@ -282,6 +235,8 @@ public class BoxMap extends ApplicationAdapter
     libgdxTexture.dispose();
     shapeRenderer.dispose();
     assetManager.dispose();
+    world.dispose();
+    boxEntityFactory.dispose();
   }
 
   public Vector2 getPlayerPosition()
@@ -348,14 +303,24 @@ public class BoxMap extends ApplicationAdapter
   {
     return entityPlayerRegion;
   }
-
+  
+  public TextureRegion getObstacleRegion()
+  {
+    return obstacleRegion;
+  }
+  
+  
   public ArrayList<Waypoint> getWaypoints()
   {
     return waypoints;
   }
 
-  public BoxEntityFactory getBoxEntityFactory()
+  public BoxEntityFactory2 getBoxEntityFactory()
   {
     return boxEntityFactory;
   }
+//  public BoxEntityFactory getBoxEntityFactory()
+//  {
+//    return boxEntityFactory;
+//  }
 }

@@ -7,18 +7,24 @@ import static de.ranagazoo.boxmap.Config.MASK_MONSTER;
 import static de.ranagazoo.boxmap.Config.MASK_MSENSOR;
 import static de.ranagazoo.boxmap.Config.MASK_PLAYER;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.utils.Disposable;
 
-public class BoxEntityFactory2
+public class BoxEntityFactory2 implements Disposable
 {
   public static final int BOXTYPE_PLAYER   = 1;
   public static final int BOXTYPE_ENEMY    = 2;
   public static final int BOXTYPE_OBSTACLE = 3;
   public static final int BOXTYPE_WAYPOINT = 4;
+  
+  private BoxMap boxMap;
   
   private BodyDef playerBodyDef;
   private BodyDef enemyBodyDef;
@@ -31,11 +37,16 @@ public class BoxEntityFactory2
   private FixtureDef obstacleFixtureDef;
   private FixtureDef waypointFixtureDef;
   
-  private PolygonShape polygonShape;
+  private PolygonShape playerPolygonShape;
+  private PolygonShape enemyPolygonShape;
+  private PolygonShape obstaclePolygonShape;
   private CircleShape circleShape;
+  private CircleShape enemyCircleShape;
 
-  public BoxEntityFactory2()
+  public BoxEntityFactory2(BoxMap boxMap)
   {
+    this.boxMap = boxMap;
+    
     playerBodyDef = new BodyDef();
     enemyBodyDef = new BodyDef();
     obstacleBodyDef = new BodyDef();
@@ -47,13 +58,12 @@ public class BoxEntityFactory2
     obstacleFixtureDef = new FixtureDef();
     waypointFixtureDef = new FixtureDef();
     
-    polygonShape = new PolygonShape();
+    playerPolygonShape = new PolygonShape();
+    enemyPolygonShape = new PolygonShape();
+    obstaclePolygonShape = new PolygonShape();
     circleShape = new CircleShape();
-  }
-
-  public void defineBodyEntities()
-  {
-        
+    enemyCircleShape = new CircleShape();
+          
     //Player
     playerBodyDef.angularDamping          = 5f;
     playerBodyDef.fixedRotation           = false;
@@ -67,8 +77,8 @@ public class BoxEntityFactory2
     playerFixtureDef.filter.maskBits      = MASK_PLAYER;
     playerFixtureDef.isSensor       = false;
     
-    polygonShape.set(new float[]{-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f});
-    playerFixtureDef.shape                = polygonShape;
+    playerPolygonShape.set(new float[]{-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f});
+    playerFixtureDef.shape                = playerPolygonShape;
     
     
     //Enemy
@@ -85,8 +95,8 @@ public class BoxEntityFactory2
     enemyFixtureDef.filter.maskBits      = MASK_MONSTER;
     enemyFixtureDef.isSensor       = false;
     
-    polygonShape.set(new float[]{-0.25f, -0.25f, 0, -1, 0.25f, -0.25f, 0.25f, 0.25f, -0.25f, 0.25f});
-    playerFixtureDef.shape                = polygonShape;
+    enemyPolygonShape.set(new float[]{-0.25f, -0.25f, 0, -1, 0.25f, -0.25f, 0.25f, 0.25f, -0.25f, 0.25f});
+    enemyFixtureDef.shape                = enemyPolygonShape;
     
     enemyFixtureDefSensor.density        = 0f;
     enemyFixtureDefSensor.friction       = 0.4f;
@@ -95,8 +105,8 @@ public class BoxEntityFactory2
     enemyFixtureDefSensor.filter.maskBits = MASK_MSENSOR;
     enemyFixtureDefSensor.isSensor       = true;
         
-    circleShape.setRadius(3);
-    enemyFixtureDefSensor.shape          = circleShape;
+    enemyCircleShape.setRadius(3);
+    enemyFixtureDefSensor.shape          = enemyCircleShape;
 
     //Obstacle
     obstacleBodyDef.angularDamping          = 2f;
@@ -111,8 +121,8 @@ public class BoxEntityFactory2
     obstacleFixtureDef.filter.maskBits      = Config.MASK_SCENERY;
     obstacleFixtureDef.isSensor       = false;
     
-    polygonShape.set(new float[]{-2f, -1f, 2f, -1f, 2f, 1f, -2f, 1f});
-    obstacleFixtureDef.shape = polygonShape;
+    obstaclePolygonShape.set(new float[]{-2f, -1f, 2f, -1f, 2f, 1f, -2f, 1f});
+    obstacleFixtureDef.shape = obstaclePolygonShape;
     
     //Waypoint
     waypointBodyDef.angularDamping          = 2f;
@@ -129,42 +139,60 @@ public class BoxEntityFactory2
     
     circleShape.setRadius(0.5f);
     waypointFixtureDef.shape = circleShape;
-        
-     
+  }
+  
+  //https://www.tutorialspoint.com/design_pattern/factory_pattern.htm
+  
+  public BoxEntity createEntity(MapProperties mapProperties)
+  {
+    String type = mapProperties.get("type", String.class);
+    float x = mapProperties.get("x", Float.class);
+    float y = mapProperties.get("y", Float.class);
+    float width = mapProperties.get("width", Float.class);
+    float height = mapProperties.get("height", Float.class);
+    Float posX = (x + width/2.0f) / Config.TS;
+    Float posY = (y + height/2.0f) / Config.TS;
     
+    if ("player1".equals(type))
+    {
+      playerBodyDef.position.set(posX, posY);
+      Body playerBody = boxMap.getWorld().createBody(playerBodyDef);
+      playerBody.createFixture(playerFixtureDef);
+      return new Player(playerBody, boxMap);
+    }
+    else if ("enemy1".equals(type))
+    {
+      enemyBodyDef.position.set(posX, posY);
+      Body enemyBody = boxMap.getWorld().createBody(enemyBodyDef);
+      enemyBody.createFixture(enemyFixtureDef);
+      enemyBody.createFixture(enemyFixtureDefSensor);
+      return new Enemy(enemyBody, boxMap);
+    }
+    else if ("obstacle".equals(type))
+    {
+      obstacleBodyDef.position.set(posX, posY);
+      Body obstacleBody = boxMap.getWorld().createBody(obstacleBodyDef);
+      obstacleBody.createFixture(obstacleFixtureDef);
+      return new Obstacle(obstacleBody, boxMap);
+    }
+    else if ("waypoint".equals(type))
+    {
+      waypointBodyDef.position.set(posX, posY);
+      Body waypointBody = boxMap.getWorld().createBody(waypointBodyDef);
+      waypointBody.createFixture(waypointFixtureDef);
+      return new Waypoint(waypointBody, boxMap);
+    }
     
-  }
-  
-  public BodyDef getBodyDef(float posX, float posY)
-  {
-    playerBodyDef.position.set(posX, posY);
-    return playerBodyDef;
-  }
-  
-  
-  
-  TODO
-  Typ abfragen beim holen. Oder aus den MapProperties?
-      Prüfen, ob das so mit den Shapes geht.
-  public FixtureDef getFixtureDef(int boxtype)
-  {
-    return playerFixtureDef;
-  }
-  
-  public PolygonShape getPolygonShape()
-  {
-    return polygonShape;
+    Gdx.app.log("BoxEntityFactory2.createEntity:", "No type given!");    
+    return null;
   }
 
-  public CircleShape getCircleShape()
+  @Override
+  public void dispose()
   {
-    return circleShape;
-  }
-
-  public void cleanUp()
-  {
-    polygonShape.dispose();
+    enemyPolygonShape.dispose();
     circleShape.dispose();
+    
   }
 
 }

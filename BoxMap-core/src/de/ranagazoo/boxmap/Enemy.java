@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -26,28 +25,39 @@ public class Enemy implements BoxEntity
   private Animation<TextureRegion> animation;
   private float stateTime;
 
-  public Enemy(BoxMap box2dMovement, MapProperties mapProperties)
+  public Enemy(Body body, BoxMap box2dMovement)
   {
+    this.enemyBody = body;
+    this.enemyBody.setUserData(this);
     this.box2dMovement = box2dMovement;
+
     currentStatus = STATUS_IDLE;
     stateTime = 0f;
     
-    float x = mapProperties.get("x", Float.class);
-    float y = mapProperties.get("y", Float.class);
-    float width = mapProperties.get("width", Float.class);
-    float height = mapProperties.get("height", Float.class);
-    
-    float posX = (x + width/2.0f) / Config.TS;
-    float posY = (y + height/2.0f) / Config.TS;
-    
-    
-    enemyBody = box2dMovement.getWorld().createBody(box2dMovement.getBoxEntityFactory().getBodyDef(posX, posY));
-    enemyBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDef());
-    enemyBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDefSensor());
-    enemyBody.setUserData(this);
-
     animation = box2dMovement.getAnimation();
   }
+//  public Enemy(BoxMap box2dMovement, MapProperties mapProperties)
+//  {
+//    this.box2dMovement = box2dMovement;
+//    currentStatus = STATUS_IDLE;
+//    stateTime = 0f;
+//    
+//    float x = mapProperties.get("x", Float.class);
+//    float y = mapProperties.get("y", Float.class);
+//    float width = mapProperties.get("width", Float.class);
+//    float height = mapProperties.get("height", Float.class);
+//    
+//    float posX = (x + width/2.0f) / Config.TS;
+//    float posY = (y + height/2.0f) / Config.TS;
+//    
+//    
+//    enemyBody = box2dMovement.getWorld().createBody(box2dMovement.getBoxEntityFactory().getBodyDef(posX, posY));
+//    enemyBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDef());
+//    enemyBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDefSensor());
+//    enemyBody.setUserData(this);
+//    
+//    animation = box2dMovement.getAnimation();
+//  }
   
   /*
    * Drei möglichkeiten, was in move passieren soll - ATTACK: Drehung und

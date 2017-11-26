@@ -6,7 +6,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -16,25 +15,50 @@ public class Player implements BoxEntity
   private Body playerBody;
   private Sprite playerSprite;
 
-  public Player(BoxMap box2dMovement, MapProperties mapProperties)
+  public Player(Body body, BoxMap boxMap)
   {
-    float x = mapProperties.get("x", Float.class);
-    float y = mapProperties.get("y", Float.class);
-    float width = mapProperties.get("width", Float.class);
-    float height = mapProperties.get("height", Float.class);
+    this.playerBody = body;
+    this.playerBody.setUserData(this);
+//    float x = mapProperties.get("x", Float.class);
+//    float y = mapProperties.get("y", Float.class);
+//    float width = mapProperties.get("width", Float.class);
+//    float height = mapProperties.get("height", Float.class);
+//    
+//    Float posX = (x + width/2.0f) / Config.TS;
+//    Float posY = (y + height/2.0f) / Config.TS;
+//    
+////    playerBody = box2dMovement.getWorld().createBody(box2dMovement.getBoxEntityFactory().getBodyDef(posX, posY));
+//    playerBody = box2dMovement.getWorld().createBody(box2dMovement.getBoxEntityFactory().getBodyDef(BoxEntityFactory2.BOXTYPE_PLAYER, posX, posY));
+////    playerBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDef());
+//    playerBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDef(BoxEntityFactory2.BOXTYPE_PLAYER));
+//    playerBody.setUserData("userData");
+//    
     
-    Float posX = (x + width/2.0f) / Config.TS;
-    Float posY = (y + height/2.0f) / Config.TS;
-    
-    playerBody = box2dMovement.getWorld().createBody(box2dMovement.getBoxEntityFactory().getBodyDef(posX, posY));
-    playerBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDef());
-    playerBody.setUserData("userData");
-    
-    
-    playerSprite = new Sprite(box2dMovement.getEntityPlayerRegion());
+    playerSprite = new Sprite(boxMap.getEntityPlayerRegion());
     playerSprite.setSize(TS, TS);
     playerSprite.setOrigin(TS / 2, TS / 2);
   }
+//  public Player(BoxMap box2dMovement, MapProperties mapProperties)
+//  {
+//    float x = mapProperties.get("x", Float.class);
+//    float y = mapProperties.get("y", Float.class);
+//    float width = mapProperties.get("width", Float.class);
+//    float height = mapProperties.get("height", Float.class);
+//    
+//    Float posX = (x + width/2.0f) / Config.TS;
+//    Float posY = (y + height/2.0f) / Config.TS;
+//    
+////    playerBody = box2dMovement.getWorld().createBody(box2dMovement.getBoxEntityFactory().getBodyDef(posX, posY));
+//    playerBody = box2dMovement.getWorld().createBody(box2dMovement.getBoxEntityFactory().getBodyDef(BoxEntityFactory2.BOXTYPE_PLAYER, posX, posY));
+////    playerBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDef());
+//    playerBody.createFixture(box2dMovement.getBoxEntityFactory().getFixtureDef(BoxEntityFactory2.BOXTYPE_PLAYER));
+//    playerBody.setUserData("userData");
+//    
+//    
+//    playerSprite = new Sprite(box2dMovement.getEntityPlayerRegion());
+//    playerSprite.setSize(TS, TS);
+//    playerSprite.setOrigin(TS / 2, TS / 2);
+//  }
 
   
   
