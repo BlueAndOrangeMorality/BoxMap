@@ -145,12 +145,14 @@ public class BoxMap extends ApplicationAdapter
     for (MapObject mapObject : map.getLayers().get(1).getObjects())
     {
       MapProperties mapProperties = mapObject.getProperties();
+      
       if("waypoint".equals(mapProperties.get("type")))
-        waypoints.add((Waypoint)boxEntityFactory.createEntity(mapProperties));
-      else 
-        boxEntities.add(boxEntityFactory.createEntity(mapProperties)); 
+        waypoints.add((Waypoint)boxEntityFactory.createEntity(mapObject));
+      else if("player1".equals(mapProperties.get("type")) || "enemy1".equals(mapProperties.get("type")) || "obstacle".equals(mapProperties.get("type"))) 
+        boxEntities.add(boxEntityFactory.createEntity(mapObject));      
     }
 
+    
     // Jedem Enemy initial einen Waypoint zuweisen
     for (BoxEntity boxEntity : boxEntities)
     {

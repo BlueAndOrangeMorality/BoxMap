@@ -7,8 +7,13 @@ import static de.ranagazoo.boxmap.Config.MASK_MONSTER;
 import static de.ranagazoo.boxmap.Config.MASK_MSENSOR;
 import static de.ranagazoo.boxmap.Config.MASK_PLAYER;
 
+import java.util.Arrays;
+
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.maps.objects.PolygonMapObject;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -143,8 +148,10 @@ public class BoxEntityFactory2 implements Disposable
   
   //https://www.tutorialspoint.com/design_pattern/factory_pattern.htm
   
-  public BoxEntity createEntity(MapProperties mapProperties)
+  public BoxEntity createEntity(MapObject mapObject)
   {
+    MapProperties mapProperties = mapObject.getProperties();
+    
     String type = mapProperties.get("type", String.class);
     float x = mapProperties.get("x", Float.class);
     float y = mapProperties.get("y", Float.class);
@@ -172,7 +179,41 @@ public class BoxEntityFactory2 implements Disposable
     {
       obstacleBodyDef.position.set(posX, posY);
       Body obstacleBody = boxMap.getWorld().createBody(obstacleBodyDef);
-      obstacleBody.createFixture(obstacleFixtureDef);
+      
+
+      Gdx.app.log("BoxMap154:  mapObject:", ""+mapObject.getClass());
+      if(mapObject.getClass().equals(PolygonMapObject.class))
+      {
+        PolygonMapObject polygonMapObject = (PolygonMapObject)mapObject;
+        Polygon polygon = polygonMapObject.getPolygon();
+        
+        
+        polygon.setPosition(0, 0);
+        polygon.setScale(1f/32f, 1f/32f);
+        Gdx.app.log("Scale", ""+polygon.getScaleX()+"-"+polygon.getScaleX());
+        float[] v = polygon.getTransformedVertices();
+        
+        for (float f : v)
+        {
+//          f = f/32f;
+          Gdx.app.log("TransVertice", ""+f);
+        }
+        float[] v2 = polygon.getVertices();
+        
+        for (float f2 : v2)
+        {
+//          f = f/32f;
+          Gdx.app.log("Vertice", ""+f2);
+        }
+        
+     
+        PolygonShape polygonShape = new PolygonShape();
+        polygonShape.set(v);
+        obstacleFixtureDef.shape = polygonShape;
+      }
+      
+      
+      obstacleBody.createFixture(obstacleFixtureDef);      
       return new Obstacle(obstacleBody, boxMap);
     }
     else if ("waypoint".equals(type))
