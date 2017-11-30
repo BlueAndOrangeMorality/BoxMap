@@ -7,19 +7,21 @@ import static de.ranagazoo.boxmap.Config.MASK_MONSTER;
 import static de.ranagazoo.boxmap.Config.MASK_MSENSOR;
 import static de.ranagazoo.boxmap.Config.MASK_PLAYER;
 
-import java.util.Arrays;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.utils.Disposable;
 
 public class BoxEntityFactory2 implements Disposable
@@ -42,7 +44,7 @@ public class BoxEntityFactory2 implements Disposable
   private FixtureDef obstacleFixtureDef;
   private FixtureDef waypointFixtureDef;
   
-  private PolygonShape playerPolygonShape;
+//  private PolygonShape playerPolygonShape;
   private PolygonShape enemyPolygonShape;
   private PolygonShape obstaclePolygonShape;
   private CircleShape circleShape;
@@ -63,7 +65,7 @@ public class BoxEntityFactory2 implements Disposable
     obstacleFixtureDef = new FixtureDef();
     waypointFixtureDef = new FixtureDef();
     
-    playerPolygonShape = new PolygonShape();
+//    playerPolygonShape = new PolygonShape();
     enemyPolygonShape = new PolygonShape();
     obstaclePolygonShape = new PolygonShape();
     circleShape = new CircleShape();
@@ -82,8 +84,10 @@ public class BoxEntityFactory2 implements Disposable
     playerFixtureDef.filter.maskBits      = MASK_PLAYER;
     playerFixtureDef.isSensor       = false;
     
-    playerPolygonShape.set(new float[]{-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f});
-    playerFixtureDef.shape                = playerPolygonShape;
+    playerFixtureDef.shape = new PolygonShape();
+    ((PolygonShape)playerFixtureDef.shape).set(new float[]{-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f});
+//    playerPolygonShape.set(new float[]{-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f});
+//    playerFixtureDef.shape                = playerPolygonShape;
     
     
     //Enemy
@@ -150,6 +154,9 @@ public class BoxEntityFactory2 implements Disposable
   
   public BoxEntity createEntity(MapObject mapObject)
   {
+    getShapeFromMapObject(mapObject);
+    
+    
     MapProperties mapProperties = mapObject.getProperties();
     
     String type = mapProperties.get("type", String.class);
@@ -180,38 +187,13 @@ public class BoxEntityFactory2 implements Disposable
       obstacleBodyDef.position.set(posX, posY);
       Body obstacleBody = boxMap.getWorld().createBody(obstacleBodyDef);
       
-
-      Gdx.app.log("BoxMap154:  mapObject:", ""+mapObject.getClass());
       if(mapObject.getClass().equals(PolygonMapObject.class))
-      {
-        PolygonMapObject polygonMapObject = (PolygonMapObject)mapObject;
-        Polygon polygon = polygonMapObject.getPolygon();
+        obstacleFixtureDef.shape = getShapeFromMapObject(mapObject);
+      if(mapObject.getClass().equals(RectangleMapObject.class))
+        obstacleFixtureDef.shape = getShapeFromMapObject(mapObject);
         
         
-        polygon.setPosition(0, 0);
-        polygon.setScale(1f/32f, 1f/32f);
-        Gdx.app.log("Scale", ""+polygon.getScaleX()+"-"+polygon.getScaleX());
-        float[] v = polygon.getTransformedVertices();
-        
-        for (float f : v)
-        {
-//          f = f/32f;
-          Gdx.app.log("TransVertice", ""+f);
-        }
-        float[] v2 = polygon.getVertices();
-        
-        for (float f2 : v2)
-        {
-//          f = f/32f;
-          Gdx.app.log("Vertice", ""+f2);
-        }
-        
-     
-        PolygonShape polygonShape = new PolygonShape();
-        polygonShape.set(v);
-        obstacleFixtureDef.shape = polygonShape;
-      }
-      
+
       
       obstacleBody.createFixture(obstacleFixtureDef);      
       return new Obstacle(obstacleBody, boxMap);
@@ -225,6 +207,49 @@ public class BoxEntityFactory2 implements Disposable
     }
     
     Gdx.app.log("BoxEntityFactory2.createEntity:", "No type given!");    
+    return null;
+  }
+  
+  
+  
+  
+  
+  public Shape getShapeFromMapObject(MapObject mapObject)
+  {
+    
+//    Gdx.app.log("BoxEntityFactory 216:  mapObject.class: ", ""+mapObject.getClass());
+    if (mapObject.getClass().equals(TiledMapTileMapObject.class))
+    {
+      //Gdx.app.log("BoxEntityFactory 230:  Warum bin ich hier?: ", "");
+      return null;
+    }
+    else if (mapObject.getClass().equals(RectangleMapObject.class))
+    {
+      Gdx.app.log("BoxEntityFactory 228:  ich bin im Rectangledings: ", ""+mapObject.getClass());
+      PolygonShape polygonShape = new PolygonShape();
+      RectangleMapObject rectangleMapObject = (RectangleMapObject)mapObject;
+      Rectangle rectangle = rectangleMapObject.getRectangle();
+      rectangle.setPosition(0, 0);
+
+      float hx = (rectangle.x + rectangle.width / 2f) / 32f;
+      float hy = (rectangle.y + rectangle.height / 2f) / 32f;
+      
+      polygonShape.setAsBox(hx, hy);
+      return polygonShape;
+    }
+    else if(mapObject.getClass().equals(PolygonMapObject.class))
+    {
+      PolygonShape polygonShape = new PolygonShape();
+      PolygonMapObject polygonMapObject = (PolygonMapObject)mapObject;
+      Polygon polygon = polygonMapObject.getPolygon();
+      polygon.setPosition(0, 0);
+      polygon.setScale(1f/32f, 1f/32f);
+      polygonShape.set(polygon.getTransformedVertices());
+      
+      return polygonShape;
+    }
+    Gdx.app.log("BoxEntityFactory 230:  UND Warum bin ich hier?: ", "");
+    
     return null;
   }
 
