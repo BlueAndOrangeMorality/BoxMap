@@ -19,4 +19,9 @@ public class Config {
   public static final short MASK_WAYPOINT = CATEGORY_MONSTER;
   
   public static final int TS = 32;
+  
+  public static final String TYPE_PLAYER1 = "player1";
+  public static final String TYPE_ENEMY1 = "enemy1";
+  public static final String TYPE_OBSTACLE = "obstacle";
+  public static final String TYPE_WAYPOINT = "waypoint";
 }

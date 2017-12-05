@@ -152,19 +152,15 @@ public class BoxEntityFactory2 implements Disposable
   {
     MapProperties mapProperties = mapObject.getProperties();
     String type = mapProperties.get("type", String.class);
-
-    getShapeFromMapObject(mapObject);
-    
-    
-    
-    if ("player1".equals(type))
+      
+    if (type.equals(Config.TYPE_PLAYER1))
     {
       playerBodyDef.position.set(getPositionFromMapObject(mapProperties));
       Body playerBody = boxMap.getWorld().createBody(playerBodyDef);
       playerBody.createFixture(playerFixtureDef);
       return new Player(playerBody, boxMap);
     }
-    else if ("enemy1".equals(type))
+    else if (type.equals(Config.TYPE_ENEMY1))
     {
       enemyBodyDef.position.set(getPositionFromMapObject(mapProperties));
       Body enemyBody = boxMap.getWorld().createBody(enemyBodyDef);
@@ -172,19 +168,11 @@ public class BoxEntityFactory2 implements Disposable
       enemyBody.createFixture(enemyFixtureDefSensor);
       return new Enemy(enemyBody, boxMap);
     }
-    else if ("obstacle".equals(type))
+    else if (type.equals(Config.TYPE_OBSTACLE))
     {
       obstacleBodyDef.position.set(getPositionFromMapObject(mapProperties));
       Body obstacleBody = boxMap.getWorld().createBody(obstacleBodyDef);
-      
-//      if(mapObject.getClass().equals(PolygonMapObject.class))
-//        obstacleFixtureDef.shape = getShapeFromMapObject(mapObject);
-//      if(mapObject.getClass().equals(RectangleMapObject.class))
-        obstacleFixtureDef.shape = getShapeFromMapObject(mapObject);
-        
-        
-
-      
+      obstacleFixtureDef.shape = getShapeFromMapObject(mapObject);
       obstacleBody.createFixture(obstacleFixtureDef);      
       return new Obstacle(obstacleBody, boxMap);
     }
