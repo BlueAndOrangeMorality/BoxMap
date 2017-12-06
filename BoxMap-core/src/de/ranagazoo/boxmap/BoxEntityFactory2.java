@@ -50,6 +50,14 @@ public class BoxEntityFactory2 implements Disposable
   private CircleShape waypointCircleShape;
   private CircleShape enemyCircleShape;
 
+  
+  
+  1. Camera anpassen
+  2. Obstacle und Waypoint brauch kein render und kein move....
+  
+  
+  
+  
   public BoxEntityFactory2(BoxMap boxMap)
   {
     this.boxMap = boxMap;
