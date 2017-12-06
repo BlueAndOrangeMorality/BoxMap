@@ -51,9 +51,8 @@ public class BoxMap extends ApplicationAdapter
   private OrthographicCamera cameraBox2dDebug;
   private SpriteBatch batch;
 
-  private Texture libgdxTexture, entitiesBigTexture, mechaTexture;
+  private Texture entitiesBigTexture, mechaTexture;
   private TextureRegion entityPlayerRegion;
-  private TextureRegion obstacleRegion;
 
   private Animation<TextureRegion> animation;
 
@@ -105,14 +104,6 @@ public class BoxMap extends ApplicationAdapter
     batch = new SpriteBatch();
     shapeRenderer = new ShapeRenderer();
 
-    // Texturen für die Sprites
-    // libgdxTexture = new Texture(Gdx.files.internal("data/libgdx.png"));
-    libgdxTexture = assetManager.get(TEXTURE_LIBGDX);
-    libgdxTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-    obstacleRegion = new TextureRegion(libgdxTexture, 0, 0, 512, 275);
-
-    // entitiesBigTexture = new
-    // Texture(Gdx.files.internal("data/entities-big.png"));
     entitiesBigTexture = assetManager.get(TEXTURE_ENTITIES);
     entitiesBigTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
     entityPlayerRegion = new TextureRegion(entitiesBigTexture, 8 * TS, 1 * TS, TS, TS);
@@ -234,7 +225,6 @@ public class BoxMap extends ApplicationAdapter
   public void dispose()
   {
     batch.dispose();
-    libgdxTexture.dispose();
     shapeRenderer.dispose();
     assetManager.dispose();
     world.dispose();
@@ -305,12 +295,6 @@ public class BoxMap extends ApplicationAdapter
   {
     return entityPlayerRegion;
   }
-  
-  public TextureRegion getObstacleRegion()
-  {
-    return obstacleRegion;
-  }
-  
   
   public ArrayList<Waypoint> getWaypoints()
   {
