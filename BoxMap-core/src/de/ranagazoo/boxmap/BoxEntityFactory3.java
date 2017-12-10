@@ -206,6 +206,11 @@ public class BoxEntityFactory3 implements Disposable
       return obstacleFixtureDef;
   }
   
+  public FixtureDef getFixtureDefSensor()
+  {
+    return enemyFixtureDefSensor;
+  }
+  
   @Override
   public void dispose()
   {

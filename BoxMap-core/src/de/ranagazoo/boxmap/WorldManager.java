@@ -62,15 +62,25 @@ public class WorldManager implements Disposable
       //Sinnvoll ist ggf., immer nur ein Shape pro Objekt anzunehmen
       //und per Parameter in der Klasse einfach nur den sensorenradius anzugeben.
       //Das ist zumindestens aktuell sinnvoll, solange entities nur ein fixture haben
-      
       //---->Das if/else kann entfallen
       
       BodyDef bodyDef = boxEntityFactory.getBodyDefFromMapObject(type);
-      FixtureDef fixtureDef = boxEntityFactory.getFixtureDefFromMapObject(type);
-         
       bodyDef.position.set(pos);
       Body body = world.createBody(bodyDef);
+         
+      //Sonderfall: Separater Shape gefunden
+      FixtureDef fixtureDef = boxEntityFactory.getFixtureDefFromMapObject(type);
+      if(type.equals(shape != null))
+        fixtureDef.shape = shape;
       body.createFixture(fixtureDef);
+      
+      //Sonderfall Enemy: Sensor hinzugefügt
+      if(type.equals(Config.TYPE_ENEMY1))
+      {
+        FixtureDef fixtureDefSensor = boxEntityFactory.getFixtureDefSensor();
+        body.createFixture(fixtureDefSensor);
+      }
+      
       
       
       this.add.type.Entity(playerBody);
