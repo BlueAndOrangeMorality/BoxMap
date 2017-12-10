@@ -8,7 +8,7 @@ public class Obstacle implements BoxEntity
 {
   private Body groundBody;
  
-  public Obstacle(Body body, BoxMap box2dMovement)
+  public Obstacle(Body body)
   { 
     groundBody = body;
     groundBody.setUserData(this);

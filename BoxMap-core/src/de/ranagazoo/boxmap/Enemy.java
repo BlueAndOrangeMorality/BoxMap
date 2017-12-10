@@ -17,7 +17,7 @@ public class Enemy implements BoxEntity
   public static final int STATUS_ATTACK = 2;
   public static final int STATUS_NEW_TARGET = 3;
 
-  private BoxMap box2dMovement;
+//  private BoxMap box2dMovement;
   private Body enemyBody;
   private int currentTargetIndex;
   private int currentStatus;

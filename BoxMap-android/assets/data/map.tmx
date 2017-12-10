@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-up" width="25" height="23" tilewidth="32" tileheight="32" nextobjectid="31">
+<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-up" width="25" height="23" tilewidth="32" tileheight="32" nextobjectid="33">
  <tileset firstgid="1" name="terrain" tilewidth="32" tileheight="32" tilecount="110" columns="11">
   <image source="terrain.png" width="352" height="320"/>
   <terraintypes>
@@ -121,6 +121,12 @@
     <property name="type" value="obstacle"/>
    </properties>
    <polygon points="0,0 464,0 472,40 32,40"/>
+  </object>
+  <object id="32" x="544" y="192">
+   <properties>
+    <property name="type" value="waypointGroup"/>
+   </properties>
+   <polyline points="0,0 96,160 96,376 -96,448 -224,192"/>
   </object>
  </objectgroup>
 </map>

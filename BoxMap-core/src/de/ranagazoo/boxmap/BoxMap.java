@@ -26,15 +26,21 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.maps.objects.PolygonMapObject;
+import com.badlogic.gdx.maps.objects.PolylineMapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 //import com.badlogic.gdx.physics.box2d.FixtureDef;
 //import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
+
+import de.ranagazoo.boxmap.Waypoint;
 
 public class BoxMap extends ApplicationAdapter
 {
@@ -59,8 +65,9 @@ public class BoxMap extends ApplicationAdapter
   private ShapeRenderer shapeRenderer;
   private Random random;
 
-  private World world;
-  private Box2DDebugRenderer debugRenderer;
+//  private World world;
+  private WorldManager worldManager;
+//  private Box2DDebugRenderer debugRenderer;
 
 //  private BoxEntityFactory boxEntityFactory;
   private BoxEntityFactory2 boxEntityFactory;
@@ -81,9 +88,10 @@ public class BoxMap extends ApplicationAdapter
     assetManager = new AssetManager();
     loadAssets();
 
-    // box2dworld
-    world = new World(new Vector2(0, 0), true);
-    world.setContactListener(new BoxMapContactListener());
+    worldManager = new WorldManager();
+//    // box2dworld
+//    world = new World(new Vector2(0, 0), true);
+//    world.setContactListener(new BoxMapContactListener());
 
 //    boxEntityFactory = new BoxEntityFactory();
     boxEntityFactory = new BoxEntityFactory2(this);
@@ -91,7 +99,7 @@ public class BoxMap extends ApplicationAdapter
     
     
     // Renderer / Cameras
-    debugRenderer = new Box2DDebugRenderer();
+//    debugRenderer = new Box2DDebugRenderer();
 
     cameraSprites = new OrthographicCamera();
     cameraSprites.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -133,8 +141,23 @@ public class BoxMap extends ApplicationAdapter
     //Erzeuge Entities aus der Map
     boxEntities = new ArrayList<BoxEntity>();
     waypoints = new ArrayList<Waypoint>();
+    
+    
+    worldManager.loadEntities(map);
+    
+    
+    
+    map.getLayers().get(1).getObjects().getByType(PolygonMapObject.class);
+    map.getLayers().get(1).getObjects().getByType(PolylineMapObject.class);
+    map.getLayers().get(1).getObjects().getByType(RectangleMapObject.class);
+    map.getLayers().get(1).getObjects().getByType(TiledMapTileMapObject.class);
+    
+    
+    
     for (MapObject mapObject : map.getLayers().get(1).getObjects())
     {
+      
+      
       MapProperties mapProperties = mapObject.getProperties();
       
       if("waypoint".equals(mapProperties.get("type")))
@@ -193,6 +216,30 @@ public class BoxMap extends ApplicationAdapter
     batch.begin();
 
     
+    
+    
+    
+    
+    BoxEntities rendern sich nicht mehr selber!
+    Sie liefern Position, Drehung, Typ(Player/Entity) und Status(Attack/Idle) zurück.
+    Gerendert wird hier anhand der Werte
+    
+    
+    Die Elemente sollten nie die Hauptklasse kriegen
+    Bei Enemy wird das schwieriger, hier muss beim Scannen des entities die Position im ContactListener übergeben werden
+    und beim zurück-zum-Wegpunkt muss auf die Wegpunktliste verwiesen werden, die am Besten schon im Entity enthalten ist
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     //Render all entities
     for (BoxEntity boxEntity : boxEntities)
     {
@@ -208,17 +255,22 @@ public class BoxMap extends ApplicationAdapter
     shapeRenderer.begin(ShapeType.Line);
 
     
-    for (int i = 0; i < waypoints.size() - 1; i++)
-    {
-      shapeRenderer.line(waypoints.get(i).getPosition().scl(32), waypoints.get(i + 1).getPosition().scl(32));
-    }
-    shapeRenderer.line(waypoints.get(waypoints.size() - 1).getPosition().scl(32), waypoints.get(0).getPosition().scl(32));
+    //shapeRenderer.polygon(floatarray from Wayypoints);    
+    
+    
+//    for (int i = 0; i < waypoints.size() - 1; i++)
+//    {
+//      shapeRenderer.line(waypoints.get(i).getPosition().scl(32), waypoints.get(i + 1).getPosition().scl(32));
+//    }
+//    shapeRenderer.line(waypoints.get(waypoints.size() - 1).getPosition().scl(32), waypoints.get(0).getPosition().scl(32));
 
     shapeRenderer.end();
 
-    world.step(1 / 60f, 6, 2);
+    worldManager.step();
+    worldManager.render(cameraBox2dDebug.combined);
+//    world.step(1 / 60f, 6, 2);
 
-    debugRenderer.render(world, cameraBox2dDebug.combined);
+    //debugRenderer.render(world, cameraBox2dDebug.combined);
   }
 
   @Override
@@ -227,7 +279,7 @@ public class BoxMap extends ApplicationAdapter
     batch.dispose();
     shapeRenderer.dispose();
     assetManager.dispose();
-    world.dispose();
+//    world.dispose();
     boxEntityFactory.dispose();
   }
 
@@ -261,6 +313,35 @@ public class BoxMap extends ApplicationAdapter
     return temp;
   }
 
+  /*
+   * Siehe MapbObjetcs  SSSSS
+   * 
+   ** @param type class of the objects we want to retrieve
+   * @param fill collection to put the returned objects in
+   * @return array filled with all the objects in the collection matching type 
+  public <T extends MapObject> Array<T> getByType (Class<T> type, Array<T> fill) {
+    fill.clear();
+    for (int i = 0, n = objects.size; i < n; i++) {
+      MapObject object = objects.get(i);
+      if (ClassReflection.isInstance(type, object)) {
+        fill.add((T)object);
+      }
+    }
+    return fill;
+  }
+   */
+  
+  
+  
+//  Avoid Enums, use final variables
+//
+//  Avoid Iterators, for-loops are faster
+//
+//  Avoid Global Static classes at all costs, their runtime differs from normal code
+//
+//   
+  
+  
   public Waypoint getWaypoint(int parameter)
   {
     return waypoints.get(parameter);
@@ -281,10 +362,10 @@ public class BoxMap extends ApplicationAdapter
     return assetManager;
   }
 
-  public World getWorld()
-  {
-    return world;
-  }
+//  public World getWorld()
+//  {
+//    return world;
+//  }
 
   public Animation<TextureRegion> getAnimation()
   {
