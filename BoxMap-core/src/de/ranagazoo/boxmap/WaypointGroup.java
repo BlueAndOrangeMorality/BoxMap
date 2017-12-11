@@ -7,6 +7,9 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
 /*
@@ -17,12 +20,24 @@ public class WaypointGroup
 {
   //Waypoints are doubled here because the rendering expects float[], but it's easier to get the right Vector
   //MAYBE THIS SHOULD BE WAYPOINT-CLASS
-  Array<Waypoint> waypoints = new Array<Waypoint>(); 
+  Array<Body> waypoints = new Array<Body>(); 
   float[] waypointsRender = new float[]{};
   
-  public WaypointGroup(MapObject mapObject)
+  //Empty Constructor, das ganze sollte hoffentlich später noch überladen werden.
+  //Das Ganze macht nur so lange Sinn, wie es nur eine WaypointGroup gibt, aber das gilt auch für WorldManager
+  //Kannst du immer noch aufzwirbeln
+  public WaypointGroup(){}
+  
+  
+  //Waypoint exisitert nicht mehr
+  
+  //Hier werden erst alle Punkte um Polygon/Polyline in waypointsRender geschrieben
+  //Dann werden daraus Waypoint-Typ-Bodys gemacht, diese in waypoint hinterlegt und jedem this als userObject übergeben
+  //So müsste man bei jedem Waypoint an dieses Eltenr-Objekt kommen und umgekehrt
+  
+  public WaypointGroup(MapObject mapObject, World world, BoxEntityFactory3 boxEntityFactory3)
   {
-      if(mapObject.getClass().equals(PolygonMapObject.class))
+    if(mapObject.getClass().equals(PolygonMapObject.class))
     {
       Polygon polygon = ((PolygonMapObject)mapObject).getPolygon();
       polygon.setPosition(0, 0);
@@ -36,37 +51,30 @@ public class WaypointGroup
       polyline.setScale(1f/32f, 1f/32f);     
       waypointsRender = polyline.getTransformedVertices();
     }
-    
-  }
   
-  public void createWaypoints()
-  {
-    if("waypoint".equals(mapProperties.get("type")))
-      waypoints.add((Waypoint)boxEntityFactory.createEntity(mapObject));
-    
-    waypointBodyDef.position.set(new Vector2(waypointsRender[i], waypointsRender[i+1]));
-    Body waypointBody = boxMap.getWorld().createBody(waypointBodyDef);
-    waypointBody.createFixture(waypointFixtureDef);
-    return new Waypoint(waypointBody, boxMap);
-    
-    
-    
-    
-    
     for (int i = 0; i < waypointsRender.length-1; i++)
     {
-      waypoints.add(new Vector2(waypointsRender[i], waypointsRender[i+1]));
+      BodyDef bodyDef = boxEntityFactory3.getBodyDefFromMapObject(Config.TYPE_WAYPOINT);
+      bodyDef.position.set(new Vector2(waypointsRender[i], waypointsRender[i+1]));
+      
+      //Hat schon seinen Shape
+      FixtureDef fixtureDef = boxEntityFactory3.getFixtureDefFromMapObject(Config.TYPE_WAYPOINT);
+      
+      Body body = world.createBody(bodyDef);
+      body.createFixture(fixtureDef);
+      body.setUserData(this);
+      waypoints.add(body);    
     }
-    
   }
   
   
-  public Vector2 get (int index) {
+  
+  public Body get (int index) {
     return waypoints.get(index);
   }  
   
-  public int getIndex (Vector2 object) {
-    return waypoints.indexOf(object, true);
+  public int getIndex (Body body) {
+    return waypoints.indexOf(body, true);
   }
 
 }
