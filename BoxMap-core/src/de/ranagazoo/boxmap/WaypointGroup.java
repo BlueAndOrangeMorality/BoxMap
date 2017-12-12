@@ -1,9 +1,13 @@
 package de.ranagazoo.boxmap;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -39,23 +43,30 @@ public class WaypointGroup
   {
     if(mapObject.getClass().equals(PolygonMapObject.class))
     {
-      Polygon polygon = ((PolygonMapObject)mapObject).getPolygon();
-      polygon.setPosition(0, 0);
-      polygon.setScale(1f/32f, 1f/32f);     
-      waypointsRender = polygon.getTransformedVertices();
+      
+      Gdx.app.log("WaypointGroupContructor", "Erst mal Polygons weggelassen");
+//      Polygon polygon = ((PolygonMapObject)mapObject).getPolygon();
+//      polygon.setPosition(0, 0);
+//      polygon.setScale(1f/32f, 1f/32f);     
+//      waypointsRender = polygon.getTransformedVertices();
     }
     else if(mapObject.getClass().equals(PolylineMapObject.class))
     {
       Polyline polyline = ((PolylineMapObject)mapObject).getPolyline();
-      polyline.setPosition(0, 0);
+      polyline.setPosition(20f, 20f);
       polyline.setScale(1f/32f, 1f/32f);     
       waypointsRender = polyline.getTransformedVertices();
+      
+      HIER HIER HIER: Position ist noch nicht richtig, und offenbar macht er aus den Linien auch Vertices
     }
   
     for (int i = 0; i < waypointsRender.length-1; i++)
     {
       BodyDef bodyDef = boxEntityFactory3.getBodyDefFromMapObject(Config.TYPE_WAYPOINT);
       bodyDef.position.set(new Vector2(waypointsRender[i], waypointsRender[i+1]));
+      
+      Gdx.app.log("WaypointGroup beim Laden", ""+waypointsRender[i] + "-" + waypointsRender[i+1]);
+      
       
       //Hat schon seinen Shape
       FixtureDef fixtureDef = boxEntityFactory3.getFixtureDefFromMapObject(Config.TYPE_WAYPOINT);
@@ -77,4 +88,20 @@ public class WaypointGroup
     return waypoints.indexOf(body, true);
   }
 
+  //TODO: Ist das so richtig?
+  public int getNextWaypoint(int lastWaypoint)
+  {
+//    Gdx.app.log("WaypointGroup.getNextWaypoint", ""+lastWaypoint + " ("+waypoints.size+")");
+    if (lastWaypoint >= waypoints.size-1)
+    {
+      return 0; 
+    }
+    else 
+      return lastWaypoint+1;
+  }
+
+  public Array<Body> getWaypoints()
+  {
+    return waypoints;
+  }
 }

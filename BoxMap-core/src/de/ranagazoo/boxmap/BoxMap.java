@@ -7,7 +7,6 @@ package de.ranagazoo.boxmap;
 
 import static de.ranagazoo.boxmap.Config.TS;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -25,25 +24,16 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapProperties;
-import com.badlogic.gdx.maps.objects.PolygonMapObject;
-import com.badlogic.gdx.maps.objects.PolylineMapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.utils.Array;
 //import com.badlogic.gdx.physics.box2d.FixtureDef;
 //import com.badlogic.gdx.physics.box2d.Shape;
-import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
-
-import de.ranagazoo.boxmap.Waypoint;
 
 public class BoxMap extends ApplicationAdapter
 {
@@ -63,6 +53,7 @@ public class BoxMap extends ApplicationAdapter
   private Texture entitiesBigTexture, mechaTexture;
   //private TextureRegion entityPlayerRegion;
   Sprite playerSprite;
+  Sprite debugSprite;
 
   private Animation<TextureRegion> animation;
   private float stateTime;
@@ -127,6 +118,10 @@ public class BoxMap extends ApplicationAdapter
     playerSprite.setSize(TS, TS);
     playerSprite.setOrigin(TS / 2, TS / 2);
     
+    debugSprite = new Sprite(new TextureRegion(entitiesBigTexture, 2 * TS, 0 * TS, TS, TS));
+    debugSprite.setSize(TS, TS);
+    debugSprite.setOrigin(TS / 2, TS / 2);
+    
     
     // Random für Random
     random = new Random();
@@ -154,7 +149,6 @@ public class BoxMap extends ApplicationAdapter
     //Erzeuge Entities aus der Map
     boxEntities = new Array<BoxEntity2>();
     boxEntities.addAll(worldManager.loadEntities(map));
-    
     
     
 //    waypoints = new ArrayList<Waypoint>();
@@ -239,27 +233,15 @@ public class BoxMap extends ApplicationAdapter
     
     
     
-    BoxEntities rendern sich nicht mehr selber!
-    Sie liefern Position, Drehung, Typ(Player/Entity) und Status(Attack/Idle) zurück.
-    Gerendert wird hier anhand der Werte
-    
-    
-    Die Elemente sollten nie die Hauptklasse kriegen
-    Bei Enemy wird das schwieriger, hier muss beim Scannen des entities die Position im ContactListener übergeben werden
-    und beim zurück-zum-Wegpunkt muss auf die Wegpunktliste verwiesen werden, die am Besten schon im Entity enthalten ist
-    
-    
-    
-    
-    
-    
-    
-    
-    
 //    
 //    
 //    Anders herum, rendern passiert hier, hol nur das Body für Pos und Drehung!
 //    //Render all entities
+    
+//    BoxEntities rendern sich nicht mehr selber!
+//    Sie liefern Position, Drehung, Typ(Player/Entity) und Status(Attack/Idle) zurück.
+//    Gerendert wird hier anhand der Werte
+    
 //    for (BoxEntity2 boxEntity : boxEntities)
 //    {
 //      boxEntity.render(batch);
@@ -287,6 +269,20 @@ public class BoxMap extends ApplicationAdapter
         s.draw(batch);            
       }
     } 
+    
+    
+    Array<Body> waypoints = worldManager.getWaypointGroup().getWaypoints();
+    
+    for (Body body : waypoints)
+    {
+      Vector2 position = body.getPosition();
+      float angle = body.getAngle();
+      
+      debugSprite.setPosition((position.x - 0.5f) * TS, (position.y - 0.5f) * TS);
+      debugSprite.setRotation(MathUtils.radiansToDegrees * angle);
+      debugSprite.draw(batch);
+    }
+      
     
     
     

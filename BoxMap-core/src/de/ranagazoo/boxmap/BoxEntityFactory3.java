@@ -9,7 +9,6 @@ import static de.ranagazoo.boxmap.Config.MASK_PLAYER;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Polygon;
@@ -99,7 +98,7 @@ public class BoxEntityFactory3 implements Disposable
     obstacleFixtureDef.restitution          = 0.1f;
     obstacleFixtureDef.filter.categoryBits  = Config.CATEGORY_SCENERY;
     obstacleFixtureDef.filter.maskBits      = Config.MASK_SCENERY;
-    obstacleFixtureDef.isSensor             = false;
+    obstacleFixtureDef.isSensor             = true;   //UMÄNDERN!!!!
     
     //Waypoint
     waypointBodyDef = new BodyDef();
@@ -178,7 +177,7 @@ public class BoxEntityFactory3 implements Disposable
       return polygonShape;
     }
 //    else if (mapObject.getClass().equals(TiledMapTileMapObject.class))
-    Gdx.app.log("BoxEntityFactory.getShapeFromMapObject: ", "Aktuell nur Obstacles vorgesehen und nur als Rectangle oder Polygon");
+    Gdx.app.log("BoxEntityFactory3.getShapeFromMapObject: ", "Aktuell nur Obstacles vorgesehen und nur als Rectangle oder Polygon");
     return null;
   }
 
@@ -200,6 +199,9 @@ public class BoxEntityFactory3 implements Disposable
       return playerFixtureDef;
     else if(type.equals(Config.TYPE_ENEMY1))
       return enemyFixtureDef;
+    else if(type.equals(Config.TYPE_WAYPOINT))
+      return waypointFixtureDef;
+    //Könnte richtig, wichtig oder egal sein
     else if(type.equals(Config.TYPE_WAYPOINTGROUP))
       return waypointFixtureDef;
     else

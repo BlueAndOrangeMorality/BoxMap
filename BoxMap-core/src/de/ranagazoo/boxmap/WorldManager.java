@@ -8,7 +8,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -60,7 +59,7 @@ public class WorldManager implements Disposable
       //Alles was keine WaypointGroup ist
       else 
       {
-        Shape shape = boxEntityFactory.getShapeFromMapObject(mapObject);
+        
         
         //Sinnvoll ist ggf., immer nur ein Shape pro Objekt anzunehmen
         //und per Parameter in der Klasse einfach nur den sensorenradius anzugeben.
@@ -76,8 +75,9 @@ public class WorldManager implements Disposable
         //Aber jedes braucht ein Shape
         
         FixtureDef fixtureDef = boxEntityFactory.getFixtureDefFromMapObject(type);
-        if(type.equals(shape != null))
-          fixtureDef.shape = shape;
+        //TODO Aktuell bekommen nur Obstacles ein Shape ausgelesen
+        if(type.equals(Config.TYPE_OBSTACLE))
+          fixtureDef.shape = boxEntityFactory.getShapeFromMapObject(mapObject);
         body.createFixture(fixtureDef);
         
         //Sonderfall Enemy: Sensor hinzugefügt
@@ -88,26 +88,32 @@ public class WorldManager implements Disposable
         }
         
         BoxEntity2 boxEntity2 = new BoxEntity2(type, body);
-        if(type.equals(Config.TYPE_ENEMY1))
+        
+        //Aktuell werden nur Player und Enemies zurückgeliefert, da nur diese move() enthalten
+        if(type.equals(Config.TYPE_PLAYER1) || type.equals(Config.TYPE_ENEMY1))
         {
-          boxEntity2.setWaypointGroup(waypointGroup);
+          boxEntities.add(boxEntity2);
         }
-        boxEntities.add(boxEntity2);
-        
-        
-        
-//      else if (type.equals(Config.TYPE_OBSTACLE))
-//      
-        
-        
-      }
-        
         
       }
       
-    return boxEntities;
+    }
     
+
+    //Muss nachträglich passieren, weil WaypointGroup nach dem ersten Entity geladen worden sein könnte.
+    for (BoxEntity2 boxEntity : boxEntities)
+    {
+      if(boxEntity.getType().equals(Config.TYPE_ENEMY1))
+      {
+        //Aktuell nur eine WaypointGroup vorgesehen
+        boxEntity.setWaypointGroup(waypointGroup);
+      }
+    }
+
+    
+    return boxEntities;    
   }
+  
   
   
   
@@ -211,5 +217,10 @@ public class WorldManager implements Disposable
   {
     world.dispose();
     boxEntityFactory.dispose();
+  }
+
+  public WaypointGroup getWaypointGroup()
+  {
+    return waypointGroup;
   }
 }

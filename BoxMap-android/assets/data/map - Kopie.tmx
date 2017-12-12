@@ -61,7 +61,47 @@
   </data>
  </layer>
  <objectgroup name="entities">
+  <object id="18" gid="115" x="608" y="192" width="32" height="32">
+   <properties>
+    <property name="type" value="waypoint"/>
+   </properties>
+  </object>
+  <object id="19" gid="115" x="704" y="384" width="32" height="32">
+   <properties>
+    <property name="type" value="waypoint"/>
+   </properties>
+  </object>
+  <object id="20" gid="115" x="544" y="672" width="32" height="32">
+   <properties>
+    <property name="type" value="waypoint"/>
+   </properties>
+  </object>
+  <object id="21" gid="115" x="128" y="640" width="32" height="32">
+   <properties>
+    <property name="type" value="waypoint"/>
+   </properties>
+  </object>
+  <object id="22" gid="115" x="160" y="320" width="32" height="32">
+   <properties>
+    <property name="type" value="waypoint"/>
+   </properties>
+  </object>
   <object id="23" gid="113" x="640" y="64" width="32" height="32">
+   <properties>
+    <property name="type" value="enemy1"/>
+   </properties>
+  </object>
+  <object id="24" gid="113" x="704" y="608" width="32" height="32">
+   <properties>
+    <property name="type" value="enemy1"/>
+   </properties>
+  </object>
+  <object id="25" gid="113" x="288" y="672" width="32" height="32">
+   <properties>
+    <property name="type" value="enemy1"/>
+   </properties>
+  </object>
+  <object id="26" gid="113" x="160" y="224" width="32" height="32">
    <properties>
     <property name="type" value="enemy1"/>
    </properties>
@@ -82,11 +122,11 @@
    </properties>
    <polygon points="0,0 464,0 472,40 32,40"/>
   </object>
-  <object id="32" x="152" y="-64">
+  <object id="32" x="544" y="192">
    <properties>
     <property name="type" value="waypointGroup"/>
    </properties>
-   <polyline points="32,352 96,352 96,416 64,384 32,416"/>
+   <polyline points="0,0 96,160 96,376 -96,448 -224,192"/>
   </object>
  </objectgroup>
 </map>

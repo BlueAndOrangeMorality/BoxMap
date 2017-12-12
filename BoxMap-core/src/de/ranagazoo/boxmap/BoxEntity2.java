@@ -8,9 +8,10 @@ import com.badlogic.gdx.physics.box2d.Body;
 
 public class BoxEntity2
 {
-  public static final int STATUS_IDLE = 1;
-  public static final int STATUS_ATTACK = 2;
-  public static final int STATUS_NEW_TARGET = 3;
+//  Die Elemente sollten nie die Hauptklasse kriegen
+//  Bei Enemy wird das schwieriger, hier muss beim Scannen des entities die Position im ContactListener übergeben werden
+//  und beim zurück-zum-Wegpunkt muss auf die Wegpunktliste verwiesen werden, die am Besten schon im Entity enthalten ist
+//  
   
   private String type;
   private Body body;
@@ -26,7 +27,7 @@ public class BoxEntity2
     this.type = type;
     this.body = body;
     this.body.setUserData(this);
-    this.status = STATUS_IDLE;
+    this.status = Config.STATUS_IDLE;
   }
   
   
@@ -37,7 +38,7 @@ public class BoxEntity2
     else if(type.equals(Config.TYPE_ENEMY1))
       moveEnemy();
     else
-      Gdx.app.log("BoxEntity.move", "Wrong type");
+      Gdx.app.log("BoxEntity2.move", "Wrong type");
   }
   
   public void movePlayer()
@@ -54,18 +55,18 @@ public class BoxEntity2
   
   public void moveEnemy()
   {
-    if (status == STATUS_ATTACK)
+    if (status == Config.STATUS_ATTACK)
     {
       //falls targetBody der Player ist
       //moveToPosition(box2dMovement.getPlayerPosition());
       moveToPosition(targetBody.getPosition());
     }
-    else if (status == STATUS_NEW_TARGET)
+    else if (status == Config.STATUS_NEW_TARGET)
     {
-      currentTargetIndex = box2dMovement.getNextWaypointIndex(currentTargetIndex);
-      // currentTargetIndex =
-      // box2dMovement.getRandomWaypointIndex(currentTargetIndex);
-      status = STATUS_IDLE;
+//      currentTargetIndex = box2dMovement.getNextWaypointIndex(currentTargetIndex);
+//      // currentTargetIndex =
+//      // box2dMovement.getRandomWaypointIndex(currentTargetIndex);
+      status = Config.STATUS_IDLE;
     }
     else
     {
@@ -172,7 +173,35 @@ public class BoxEntity2
   public void setWaypointGroup(WaypointGroup waypointGroup)
   {
     this.waypointGroup = waypointGroup;
-    this.targetIndex = 0;
+    this.targetIndex = 4;
+    this.targetBody = waypointGroup.get(targetIndex);
   }
   
+  public void setStatus(int status)
+  {
+    this.status = status;
+  }
+  
+  public void setTargetBody(Body body)
+  {
+    this.targetBody = body;
+  }
+  
+  //Gets the last saved Waypoint (Body) from the Enemys WaypointGroup
+  public void resetTargetBodyToWaypoint()
+  {
+    this.targetBody = this.waypointGroup.get(targetIndex);
+  }
+
+//  public void setNextWaypoint()
+//  {
+//    targetIndex = this.waypointGroup.getNextWaypoint(targetIndex);
+//    targetBody = this.waypointGroup.get(targetIndex);
+//  }
+  
+  public void setNextWaypoint(int oldTargetIndex)
+  {
+    targetIndex = this.waypointGroup.getNextWaypoint(oldTargetIndex);
+    targetBody = this.waypointGroup.get(targetIndex);
+  }
 }
