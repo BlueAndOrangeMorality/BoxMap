@@ -1,13 +1,10 @@
 package de.ranagazoo.boxmap;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -43,29 +40,60 @@ public class WaypointGroup
   {
     if(mapObject.getClass().equals(PolygonMapObject.class))
     {
+      HIERHIERHIER: Okay, du machst schon mal nicht mehr so viele dinge zu viel, aber warum der offset?
+      
       
       Gdx.app.log("WaypointGroupContructor", "Erst mal Polygons weggelassen");
-//      Polygon polygon = ((PolygonMapObject)mapObject).getPolygon();
-//      polygon.setPosition(0, 0);
-//      polygon.setScale(1f/32f, 1f/32f);     
-//      waypointsRender = polygon.getTransformedVertices();
+      Polygon polygon = ((PolygonMapObject)mapObject).getPolygon();
+      polygon.setPosition(17.5f, 11.5f);
+      polygon.setScale(1f/32f, 1f/32f);     
+      waypointsRender = polygon.getTransformedVertices();
+
+      for (int i = 0; i < waypointsRender.length; i++)
+      {
+        Gdx.app.log("waypointsRender["+i+"]", ""+waypointsRender[i]);
+      }
+      Gdx.app.log("Polgon:Anzahl", ""+waypointsRender.length);
     }
     else if(mapObject.getClass().equals(PolylineMapObject.class))
     {
-      Polyline polyline = ((PolylineMapObject)mapObject).getPolyline();
-      polyline.setPosition(20f, 20f);
-      polyline.setScale(1f/32f, 1f/32f);     
-      waypointsRender = polyline.getTransformedVertices();
+//      Polyline polyline = ((PolylineMapObject)mapObject).getPolyline();
+//      Gdx.app.log("Waypointgroup: Ursprungsposition", ""+polyline.getX()+"-"+polyline.getY());
+//      polyline.setPosition(6f, 25f);
+//      polyline.setScale(1f/32f, 1f/32f);     
+//      float[] a = polyline.getTransformedVertices();
+//      float[] d = polyline.getVertices();
+//      //HIER HIER HIER: Position ist noch nicht richtig, und offenbar macht er aus den Linien auch Vertices
+//      
+////      int remove = 4;
+////      float[] b = new float[a.length-remove];
+////      float[] c = new float[a.length-remove];
+////
+////      //remove last numbers: b
+////      for(int i=0; i<b.length; i++)
+////      {
+////        b[i] = a[i];
+////      }
+////
+////      //remove first numbers: a
+////      for(int i=0; i<b.length; i++)
+////      {
+////        c[i] = a[i+remove];
+////      }
+////      Gdx.app.log("", ""+a.length + " - " + b.length + " - " + c.length);
+//      Gdx.app.log("", ""+a.length + " - " + d.length);
+//
+//      waypointsRender = a;
       
-      HIER HIER HIER: Position ist noch nicht richtig, und offenbar macht er aus den Linien auch Vertices
+      
     }
   
-    for (int i = 0; i < waypointsRender.length-1; i++)
+    for(int i = 0 ; i < (waypointsRender.length/2)+2; i += 2)
     {
       BodyDef bodyDef = boxEntityFactory3.getBodyDefFromMapObject(Config.TYPE_WAYPOINT);
       bodyDef.position.set(new Vector2(waypointsRender[i], waypointsRender[i+1]));
       
-      Gdx.app.log("WaypointGroup beim Laden", ""+waypointsRender[i] + "-" + waypointsRender[i+1]);
+//      Gdx.app.log("WaypointGroup beim Laden", ""+waypointsRender[i] + "-" + waypointsRender[i+1]);
       
       
       //Hat schon seinen Shape

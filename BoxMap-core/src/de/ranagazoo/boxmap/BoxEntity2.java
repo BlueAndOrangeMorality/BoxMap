@@ -173,7 +173,7 @@ public class BoxEntity2
   public void setWaypointGroup(WaypointGroup waypointGroup)
   {
     this.waypointGroup = waypointGroup;
-    this.targetIndex = 4;
+    this.targetIndex = 0;
     this.targetBody = waypointGroup.get(targetIndex);
   }
   
