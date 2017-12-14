@@ -86,7 +86,7 @@
    <properties>
     <property name="type" value="waypointGroup"/>
    </properties>
-   <polygon points="0,0 -64,160 -352,96"/>
+   <polygon points="64,0 -32,256 -352,256 -416,96 -416,32 -256,32 -224,-96 32,-128"/>
   </object>
  </objectgroup>
 </map>

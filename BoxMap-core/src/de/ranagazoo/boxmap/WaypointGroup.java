@@ -1,11 +1,9 @@
 package de.ranagazoo.boxmap;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -39,21 +37,12 @@ public class WaypointGroup
   public WaypointGroup(MapObject mapObject, World world, BoxEntityFactory3 boxEntityFactory3)
   {
     if(mapObject.getClass().equals(PolygonMapObject.class))
-    {
-      HIERHIERHIER: Okay, du machst schon mal nicht mehr so viele dinge zu viel, aber warum der offset?
-      
-      
-      Gdx.app.log("WaypointGroupContructor", "Erst mal Polygons weggelassen");
+    {     
       Polygon polygon = ((PolygonMapObject)mapObject).getPolygon();
-      polygon.setPosition(17.5f, 11.5f);
-      polygon.setScale(1f/32f, 1f/32f);     
+      polygon.setScale(1f/32f, 1f/32f);
+      polygon.setPosition(polygon.getX()/32f, polygon.getY()/32f);
+      
       waypointsRender = polygon.getTransformedVertices();
-
-      for (int i = 0; i < waypointsRender.length; i++)
-      {
-        Gdx.app.log("waypointsRender["+i+"]", ""+waypointsRender[i]);
-      }
-      Gdx.app.log("Polgon:Anzahl", ""+waypointsRender.length);
     }
     else if(mapObject.getClass().equals(PolylineMapObject.class))
     {
@@ -88,13 +77,10 @@ public class WaypointGroup
       
     }
   
-    for(int i = 0 ; i < (waypointsRender.length/2)+2; i += 2)
+    for(int i = 0 ; i < waypointsRender.length -1 ; i += 2)
     {
       BodyDef bodyDef = boxEntityFactory3.getBodyDefFromMapObject(Config.TYPE_WAYPOINT);
       bodyDef.position.set(new Vector2(waypointsRender[i], waypointsRender[i+1]));
-      
-//      Gdx.app.log("WaypointGroup beim Laden", ""+waypointsRender[i] + "-" + waypointsRender[i+1]);
-      
       
       //Hat schon seinen Shape
       FixtureDef fixtureDef = boxEntityFactory3.getFixtureDefFromMapObject(Config.TYPE_WAYPOINT);
@@ -119,7 +105,6 @@ public class WaypointGroup
   //TODO: Ist das so richtig?
   public int getNextWaypoint(int lastWaypoint)
   {
-//    Gdx.app.log("WaypointGroup.getNextWaypoint", ""+lastWaypoint + " ("+waypoints.size+")");
     if (lastWaypoint >= waypoints.size-1)
     {
       return 0; 
