@@ -19,8 +19,8 @@ public class WaypointGroup
 {
   //Waypoints are doubled here because the rendering expects float[], but it's easier to get the right Vector
   //MAYBE THIS SHOULD BE WAYPOINT-CLASS
-  Array<Body> waypoints = new Array<Body>(); 
-  float[] waypointsRender = new float[]{};
+  private Array<Body> waypoints = new Array<Body>(); 
+  private float[] waypointsRender = new float[]{};
   
   //Empty Constructor, das ganze sollte hoffentlich später noch überladen werden.
   //Das Ganze macht nur so lange Sinn, wie es nur eine WaypointGroup gibt, aber das gilt auch für WorldManager
@@ -36,13 +36,27 @@ public class WaypointGroup
   
   public WaypointGroup(MapObject mapObject, World world, BoxEntityFactory3 boxEntityFactory3)
   {
+    float[] waypointsTransformed = new float[]{};
+    float[] waypointsTemp = new float[]{};
     if(mapObject.getClass().equals(PolygonMapObject.class))
     {     
       Polygon polygon = ((PolygonMapObject)mapObject).getPolygon();
       polygon.setScale(1f/32f, 1f/32f);
       polygon.setPosition(polygon.getX()/32f, polygon.getY()/32f);
       
-      waypointsRender = polygon.getTransformedVertices();
+      waypointsTransformed = polygon.getTransformedVertices();
+      waypointsTemp = polygon.getVertices();
+      waypointsRender = new float[waypointsTemp.length];
+      aaaaaaaaaaa Unschön, aber geht
+      for (int i = 0; i < waypointsTemp.length; i++)
+      {
+        if(i%2 == 0)
+          waypointsRender[i] = waypointsTemp[i] + polygon.getX()*32f;
+        else
+          waypointsRender[i] = waypointsTemp[i] + polygon.getY()*32f;
+      }
+      
+      
     }
     else if(mapObject.getClass().equals(PolylineMapObject.class))
     {
@@ -77,10 +91,10 @@ public class WaypointGroup
       
     }
   
-    for(int i = 0 ; i < waypointsRender.length -1 ; i += 2)
+    for(int i = 0 ; i < waypointsTransformed.length -1 ; i += 2)
     {
       BodyDef bodyDef = boxEntityFactory3.getBodyDefFromMapObject(Config.TYPE_WAYPOINT);
-      bodyDef.position.set(new Vector2(waypointsRender[i], waypointsRender[i+1]));
+      bodyDef.position.set(new Vector2(waypointsTransformed[i], waypointsTransformed[i+1]));
       
       //Hat schon seinen Shape
       FixtureDef fixtureDef = boxEntityFactory3.getFixtureDefFromMapObject(Config.TYPE_WAYPOINT);
@@ -116,5 +130,11 @@ public class WaypointGroup
   public Array<Body> getWaypoints()
   {
     return waypoints;
+  }
+
+
+  public float[] getWaypointsRender()
+  {
+    return waypointsRender;
   }
 }

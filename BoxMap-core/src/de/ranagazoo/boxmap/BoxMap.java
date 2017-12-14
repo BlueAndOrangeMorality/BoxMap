@@ -41,40 +41,28 @@ public class BoxMap extends ApplicationAdapter
   public static final String TEXTURE_LIBGDX = "data/libgdx.png";
   public static final String TEXTURE_ENTITIES = "data/entities-big.png";
   public static final String TEXTURE_MECHA = "data/mecha32.png";
-
   public static final String MAP_MAP = "data/map.tmx";
-  
-  private AssetManager assetManager;
 
   private OrthographicCamera cameraSprites;
   private OrthographicCamera cameraBox2dDebug;
+
+  private AssetManager assetManager;
   private SpriteBatch batch;
-
-  private Texture entitiesBigTexture, mechaTexture;
-  //private TextureRegion entityPlayerRegion;
-  Sprite playerSprite;
-  Sprite debugSprite;
-
+  
+  private Sprite playerSprite;
+  private Sprite debugSprite;
   private Animation<TextureRegion> animation;
+
   private float stateTime;
 
-  private ShapeRenderer shapeRenderer;
-  private Random random;
-
-//  private World world;
   private WorldManager worldManager;
-//  private Box2DDebugRenderer debugRenderer;
-
-//  private BoxEntityFactory boxEntityFactory;
-//  private BoxEntityFactory2 boxEntityFactory;
+  private ShapeRenderer shapeRenderer;
   
   private TiledMap map; 
   private TiledMapRenderer mapRenderer;
   
   // My Objects
   private Array<BoxEntity2> boxEntities;
-  
-//  private ArrayList<Waypoint> waypoints;
 
   private DebugOutput debugOutput;
 
@@ -86,17 +74,6 @@ public class BoxMap extends ApplicationAdapter
     loadAssets();
 
     worldManager = new WorldManager();
-//    // box2dworld
-//    world = new World(new Vector2(0, 0), true);
-//    world.setContactListener(new BoxMapContactListener());
-
-//    boxEntityFactory = new BoxEntityFactory();
-//    boxEntityFactory = new BoxEntityFactory2(this);
-    
-    
-    
-    // Renderer / Cameras
-//    debugRenderer = new Box2DDebugRenderer();
 
     cameraSprites = new OrthographicCamera();
     cameraSprites.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -109,10 +86,8 @@ public class BoxMap extends ApplicationAdapter
     batch = new SpriteBatch();
     shapeRenderer = new ShapeRenderer();
 
-    entitiesBigTexture = assetManager.get(TEXTURE_ENTITIES);
-    entitiesBigTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-//    entityPlayerRegion = new TextureRegion(entitiesBigTexture, 8 * TS, 1 * TS, TS, TS);
-    
+    Texture entitiesBigTexture = assetManager.get(TEXTURE_ENTITIES);
+    entitiesBigTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);    
     
     playerSprite = new Sprite(new TextureRegion(entitiesBigTexture, 8 * TS, 1 * TS, TS, TS));
     playerSprite.setSize(TS, TS);
@@ -121,14 +96,9 @@ public class BoxMap extends ApplicationAdapter
     debugSprite = new Sprite(new TextureRegion(entitiesBigTexture, 2 * TS, 0 * TS, TS, TS));
     debugSprite.setSize(TS, TS);
     debugSprite.setOrigin(TS / 2, TS / 2);
-    
-    
-    // Random für Random
-    random = new Random();
 
-    debugOutput = new DebugOutput();
 
-    mechaTexture = assetManager.get(TEXTURE_MECHA);
+    Texture mechaTexture = assetManager.get(TEXTURE_MECHA);
     mechaTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
     TextureRegion[] animationFrames = new TextureRegion[5];
@@ -138,6 +108,8 @@ public class BoxMap extends ApplicationAdapter
     animationFrames[3] = new TextureRegion(mechaTexture, 192, 384, 64, 64);
     animationFrames[4] = new TextureRegion(mechaTexture, 256, 384, 64, 64);
     animation = new Animation<TextureRegion>(0.1f, animationFrames);
+
+    debugOutput = new DebugOutput();
 
     stateTime = 0f;
     
@@ -150,42 +122,6 @@ public class BoxMap extends ApplicationAdapter
     boxEntities = new Array<BoxEntity2>();
     boxEntities.addAll(worldManager.loadEntities(map));
     
-    
-//    waypoints = new ArrayList<Waypoint>();
-    
-    
-    
-    
-    
-    
-    
-//    
-//    map.getLayers().get(1).getObjects().getByType(PolygonMapObject.class);
-//    map.getLayers().get(1).getObjects().getByType(PolylineMapObject.class);
-//    map.getLayers().get(1).getObjects().getByType(RectangleMapObject.class);
-//    map.getLayers().get(1).getObjects().getByType(TiledMapTileMapObject.class);
-//    
-//    
-//    
-//    for (MapObject mapObject : map.getLayers().get(1).getObjects())
-//    {
-//      
-//      
-//      MapProperties mapProperties = mapObject.getProperties();
-//      
-//      if("waypoint".equals(mapProperties.get("type")))
-//        waypoints.add((Waypoint)boxEntityFactory.createEntity(mapObject));
-//      else if("player1".equals(mapProperties.get("type")) || "enemy1".equals(mapProperties.get("type")) || "obstacle".equals(mapProperties.get("type"))) 
-//        boxEntities.add(boxEntityFactory.createEntity(mapObject));      
-//    }
-
-    
-//    // Jedem Enemy initial einen Waypoint zuweisen
-//    for (BoxEntity2 boxEntity : boxEntities)
-//    {
-//      if (boxEntity.getClass() == Enemy.class)
-//        ((Enemy) boxEntity).setCurrentTargetId(getRandomWaypointIndex(0));
-//    }
 
     // TODO Box2dChainShape funktioniert nicht mit 1.9.7
 
@@ -217,8 +153,6 @@ public class BoxMap extends ApplicationAdapter
     {
       boxEntity.move();
     }
-
-    
     
     Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 0);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -227,27 +161,12 @@ public class BoxMap extends ApplicationAdapter
     
     batch.setProjectionMatrix(cameraSprites.combined);
     batch.begin();
-
     
-    
-    
-    
-    
-//    
-//    
-//    Anders herum, rendern passiert hier, hol nur das Body für Pos und Drehung!
-//    //Render all entities
-    
+    //Aktuell werden nur Player und Enemies gerendert
 //    BoxEntities rendern sich nicht mehr selber!
 //    Sie liefern Position, Drehung, Typ(Player/Entity) und Status(Attack/Idle) zurück.
 //    Gerendert wird hier anhand der Werte
-    
-//    for (BoxEntity2 boxEntity : boxEntities)
-//    {
-//      boxEntity.render(batch);
-//    }
-    
-    //Aktuell werden nur Player und Enemies gerendert
+
     for (BoxEntity2 boxEntity : boxEntities)
     {
       Vector2 position = boxEntity.getBody().getPosition();
@@ -270,7 +189,6 @@ public class BoxMap extends ApplicationAdapter
       }
     } 
     
-    
     Array<Body> waypoints = worldManager.getWaypointGroup().getWaypoints();
     
     for (Body body : waypoints)
@@ -282,8 +200,6 @@ public class BoxMap extends ApplicationAdapter
       debugSprite.setRotation(MathUtils.radiansToDegrees * angle);
       debugSprite.draw(batch);
     }
-      
-    
     
     
     //Render debug messages
@@ -295,7 +211,7 @@ public class BoxMap extends ApplicationAdapter
     shapeRenderer.begin(ShapeType.Line);
 
     
-    //shapeRenderer.polygon(floatarray from Wayypoints);    
+    shapeRenderer.polygon(worldManager.getWaypointGroup().getWaypointsRender());    
     
     
 //    for (int i = 0; i < waypoints.size() - 1; i++)
