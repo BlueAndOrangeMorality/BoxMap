@@ -16,7 +16,7 @@ public class WorldManager implements Disposable
 {
   private World world;
   private Box2DDebugRenderer debugRenderer;
-  private BoxEntityFactory3 boxEntityFactory;
+  private BoxEntityFactory boxEntityFactory;
   private WaypointGroup waypointGroup;
   
   public WorldManager()
@@ -24,31 +24,18 @@ public class WorldManager implements Disposable
     world = new World(new Vector2(0, 0), true);
     world.setContactListener(new BoxMapContactListener());
     debugRenderer = new Box2DDebugRenderer();
-    boxEntityFactory = new BoxEntityFactory3();
+    boxEntityFactory = new BoxEntityFactory();
     waypointGroup = new WaypointGroup();
   }
   
-  public  Array<BoxEntity2> loadEntities(TiledMap tiledMap)
+  public  Array<BoxEntity> loadEntities(TiledMap tiledMap)
   {
-    Array<BoxEntity2> boxEntities = new Array<BoxEntity2>();
-//    
-//    Hier werden die ganzen entities mit world.clearForces();.WorldManager   erzeugt
-//    am Besten werden hier die Entities auch schon eingeteilt und dann an das Spiel zurückgeliefert, damit beim rendern da drüberiteriert wird.
-//    für render und move
-//    
-//    quasi den teil hier aus boxmap richtig durchlaufen lassen
-//  
-//    tiledMap.getLayers().get(1).getObjects().getByType(PolygonMapObject.class);
-//    tiledMap.getLayers().get(1).getObjects().getByType(PolylineMapObject.class);
-//    tiledMap.getLayers().get(1).getObjects().getByType(RectangleMapObject.class);
-//    tiledMap.getLayers().get(1).getObjects().getByType(TiledMapTileMapObject.class);
-//    
-    
-    
+    Array<BoxEntity> boxEntities = new Array<BoxEntity>();
+
     for (MapObject mapObject : tiledMap.getLayers().get(1).getObjects())
     {
-      String type = boxEntityFactory.getTypeFromMapObject(mapObject);
-      Vector2 pos = boxEntityFactory.getPositionFromMapObject(mapObject);
+      String type = boxEntityFactory.getType(mapObject);
+      Vector2 pos = boxEntityFactory.getPosition(mapObject);
       
       
       //TODO: Falls WaypontGroup, das hier erstellen!
@@ -66,7 +53,7 @@ public class WorldManager implements Disposable
         //Das ist zumindestens aktuell sinnvoll, solange entities nur ein fixture haben
         //---->Das if/else kann entfallen
         
-        BodyDef bodyDef = boxEntityFactory.getBodyDefFromMapObject(type);
+        BodyDef bodyDef = boxEntityFactory.getBodyDef(type);
         bodyDef.position.set(pos);
         Body body = world.createBody(bodyDef);
         
@@ -74,10 +61,10 @@ public class WorldManager implements Disposable
         //Gegebenenfalls mehrere FixtureDefs als Array holen?
         //Aber jedes braucht ein Shape
         
-        FixtureDef fixtureDef = boxEntityFactory.getFixtureDefFromMapObject(type);
+        FixtureDef fixtureDef = boxEntityFactory.getFixtureDef(type);
         //TODO Aktuell bekommen nur Obstacles ein Shape ausgelesen
         if(type.equals(Config.TYPE_OBSTACLE))
-          fixtureDef.shape = boxEntityFactory.getShapeFromMapObject(mapObject);
+          fixtureDef.shape = boxEntityFactory.getShape(mapObject);
         body.createFixture(fixtureDef);
         
         //Sonderfall Enemy: Sensor hinzugefügt
@@ -87,7 +74,7 @@ public class WorldManager implements Disposable
           body.createFixture(fixtureDefSensor);
         }
         
-        BoxEntity2 boxEntity2 = new BoxEntity2(type, body);
+        BoxEntity boxEntity2 = new BoxEntity(type, body);
         
         //Aktuell werden nur Player und Enemies zurückgeliefert, da nur diese move() enthalten
         if(type.equals(Config.TYPE_PLAYER1) || type.equals(Config.TYPE_ENEMY1))
@@ -101,7 +88,7 @@ public class WorldManager implements Disposable
     
 
     //Muss nachträglich passieren, weil WaypointGroup nach dem ersten Entity geladen worden sein könnte.
-    for (BoxEntity2 boxEntity : boxEntities)
+    for (BoxEntity boxEntity : boxEntities)
     {
       if(boxEntity.getType().equals(Config.TYPE_ENEMY1))
       {
@@ -110,7 +97,6 @@ public class WorldManager implements Disposable
       }
     }
 
-    
     return boxEntities;    
   }
   
@@ -126,91 +112,6 @@ public class WorldManager implements Disposable
   {
     debugRenderer.render(world, combined);
   }
-  
-  public BoxEntity createEntity(MapObject mapObject)
-  {
-//    MapProperties mapProperties = mapObject.getProperties();
-//    String type = mapProperties.get("type", String.class);
-//      
-//    if (type.equals(Config.TYPE_PLAYER1))
-//    {
-//      playerBodyDef.position.set(getPositionFromMapObject(mapProperties));
-//      Body playerBody = world.createBody(playerBodyDef);
-//      playerBody.createFixture(playerFixtureDef);
-//      return new Player(playerBody, boxMap);
-//    }
-//    else if (type.equals(Config.TYPE_ENEMY1))
-//    {
-//      enemyBodyDef.position.set(getPositionFromMapObject(mapProperties));
-//      Body enemyBody = world.createBody(enemyBodyDef);
-//      enemyBody.createFixture(enemyFixtureDef);
-//      enemyBody.createFixture(enemyFixtureDefSensor);
-//      return new Enemy(enemyBody, boxMap);
-//    }
-//    else if (type.equals(Config.TYPE_OBSTACLE))
-//    {
-//      obstacleBodyDef.position.set(getPositionFromMapObject(mapProperties));
-//      Body obstacleBody = world.createBody(obstacleBodyDef);
-//      obstacleFixtureDef.shape = getShapeFromMapObject(mapObject);
-//      obstacleBody.createFixture(obstacleFixtureDef);      
-//      return new Obstacle(obstacleBody);
-//    }
-////    else if ("waypoint".equals(type))
-////    {
-////      waypointBodyDef.position.set(getPositionFromMapObject(mapProperties));
-////      Body waypointBody = boxMap.getWorld().createBody(waypointBodyDef);
-////      waypointBody.createFixture(waypointFixtureDef);
-////      return new Waypoint(waypointBody, boxMap);
-////    }
-//    
-//    Gdx.app.log("BoxEntityFactory2.createEntity:", "No type given!");    
-    return null;
-  }
-  
-  
-  
-  
-//  
-//  
-//  private Vector2 getPositionFromMapObject(MapProperties mapProperties)
-//  {
-//    float x = mapProperties.get("x", Float.class);
-//    float y = mapProperties.get("y", Float.class);
-//    float width = mapProperties.get("width", Float.class);
-//    float height = mapProperties.get("height", Float.class);
-//    Float posX = (x + width/2.0f) / Config.TS;
-//    Float posY = (y + height/2.0f) / Config.TS;
-//    return new Vector2(posX, posY);
-//  }
-//  
-//  public Shape getShapeFromMapObject(MapObject mapObject)
-//  {
-//    if(mapObject.getClass().equals(PolygonMapObject.class))
-//    {
-//      Polygon polygon = ((PolygonMapObject)mapObject).getPolygon();
-//      polygon.setPosition(0, 0);
-//      polygon.setScale(1f/32f, 1f/32f);
-//      
-//      PolygonShape polygonShape = new PolygonShape();
-//      polygonShape.set(polygon.getTransformedVertices());
-//      
-//      return polygonShape;
-//    }
-//    else if (mapObject.getClass().equals(RectangleMapObject.class))
-//    {      
-//      Rectangle rectangle = ((RectangleMapObject)mapObject).getRectangle();
-//      rectangle.setPosition(0, 0);
-//      float hx = (rectangle.x + rectangle.width / 2f) / 32f;
-//      float hy = (rectangle.y + rectangle.height / 2f) / 32f;
-//      PolygonShape polygonShape = new PolygonShape();
-//      polygonShape.setAsBox(hx, hy);
-//      return polygonShape;
-//    }
-////    else if (mapObject.getClass().equals(TiledMapTileMapObject.class))
-//    Gdx.app.log("BoxEntityFactory.getShapeFromMapObject: ", "Aktuell nur Obstacles vorgesehen und nur als Rectangle oder Polygon");
-//    return null;
-//  }
-
   
   @Override
   public void dispose()

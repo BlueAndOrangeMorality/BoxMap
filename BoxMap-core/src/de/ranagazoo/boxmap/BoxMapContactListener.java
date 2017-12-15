@@ -24,7 +24,7 @@ public class BoxMapContactListener implements ContactListener
     if(checkCategoryBits(contact, CATEGORY_PLAYER, CATEGORY_MSENSOR))
     {
       //BoxEntity2 player = (BoxEntity2)contact.getFixtureA().getBody().getUserData();
-      BoxEntity2 enemy = (BoxEntity2)contact.getFixtureB().getBody().getUserData();
+      BoxEntity enemy = (BoxEntity)contact.getFixtureB().getBody().getUserData();
       
       enemy.setStatus(Config.STATUS_ATTACK);
       enemy.setTargetBody(contact.getFixtureA().getBody());
@@ -34,7 +34,7 @@ public class BoxMapContactListener implements ContactListener
     //Monster hat Spieler erwischt
     if(checkCategoryBits(contact, CATEGORY_PLAYER, CATEGORY_MONSTER))
     {
-      BoxEntity2 enemy = (BoxEntity2)contact.getFixtureB().getBody().getUserData();
+      BoxEntity enemy = (BoxEntity)contact.getFixtureB().getBody().getUserData();
       
       enemy.setStatus(Config.STATUS_NEW_TARGET);
       enemy.resetTargetBodyToWaypoint();
@@ -46,7 +46,7 @@ public class BoxMapContactListener implements ContactListener
     //Monster hat waypoint erreicht (NICHT MonsterSensor)
     if(checkCategoryBits(contact, CATEGORY_MONSTER, CATEGORY_WAYPOINT))
     {
-      BoxEntity2 enemy = (BoxEntity2)contact.getFixtureA().getBody().getUserData();
+      BoxEntity enemy = (BoxEntity)contact.getFixtureA().getBody().getUserData();
 
       //Will den neuen Wegpunkt anhand des aktuellen setzen
       Body waypointBody = contact.getFixtureB().getBody();
@@ -71,7 +71,7 @@ public class BoxMapContactListener implements ContactListener
     //player ist aus monstersensor-reichweite: neuer waypoint
     if(checkCategoryBits(contact, CATEGORY_PLAYER, CATEGORY_MSENSOR))
     {
-      BoxEntity2 enemy = (BoxEntity2)contact.getFixtureB().getBody().getUserData();
+      BoxEntity enemy = (BoxEntity)contact.getFixtureB().getBody().getUserData();
       enemy.setStatus(Config.STATUS_NEW_TARGET);
       enemy.resetTargetBodyToWaypoint();
 
@@ -84,7 +84,7 @@ public class BoxMapContactListener implements ContactListener
     
     if(checkCategoryBits(contact, CATEGORY_PLAYER, CATEGORY_MONSTER))
     {
-      BoxEntity2 enemy = (BoxEntity2)contact.getFixtureB().getBody().getUserData();
+      BoxEntity enemy = (BoxEntity)contact.getFixtureB().getBody().getUserData();
       enemy.setStatus(Config.STATUS_NEW_TARGET);
       enemy.resetTargetBodyToWaypoint();
 //      ((Enemy)contact.getFixtureB().getBody().getUserData()).setStatus(Enemy.STATUS_NEW_TARGET);

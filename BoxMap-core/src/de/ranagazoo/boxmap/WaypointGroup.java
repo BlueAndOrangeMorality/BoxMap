@@ -34,7 +34,7 @@ public class WaypointGroup
   //Dann werden daraus Waypoint-Typ-Bodys gemacht, diese in waypoint hinterlegt und jedem this als userObject übergeben
   //So müsste man bei jedem Waypoint an dieses Eltenr-Objekt kommen und umgekehrt
   
-  public WaypointGroup(MapObject mapObject, World world, BoxEntityFactory3 boxEntityFactory3)
+  public WaypointGroup(MapObject mapObject, World world, BoxEntityFactory boxEntityFactory3)
   {
     float[] waypointsTransformed = new float[]{};
     float[] waypointsTemp = new float[]{};
@@ -47,7 +47,7 @@ public class WaypointGroup
       waypointsTransformed = polygon.getTransformedVertices();
       waypointsTemp = polygon.getVertices();
       waypointsRender = new float[waypointsTemp.length];
-      aaaaaaaaaaa Unschön, aber geht
+      //aaaaaaaaaaa Unschön, aber geht
       for (int i = 0; i < waypointsTemp.length; i++)
       {
         if(i%2 == 0)
@@ -93,11 +93,11 @@ public class WaypointGroup
   
     for(int i = 0 ; i < waypointsTransformed.length -1 ; i += 2)
     {
-      BodyDef bodyDef = boxEntityFactory3.getBodyDefFromMapObject(Config.TYPE_WAYPOINT);
+      BodyDef bodyDef = boxEntityFactory3.getBodyDef(Config.TYPE_WAYPOINT);
       bodyDef.position.set(new Vector2(waypointsTransformed[i], waypointsTransformed[i+1]));
       
       //Hat schon seinen Shape
-      FixtureDef fixtureDef = boxEntityFactory3.getFixtureDefFromMapObject(Config.TYPE_WAYPOINT);
+      FixtureDef fixtureDef = boxEntityFactory3.getFixtureDef(Config.TYPE_WAYPOINT);
       
       Body body = world.createBody(bodyDef);
       body.createFixture(fixtureDef);

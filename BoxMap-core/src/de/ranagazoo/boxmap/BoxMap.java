@@ -1,13 +1,7 @@
 package de.ranagazoo.boxmap;
 
-//import static de.ranagazoo.box.Box2dBuilder.createBody;
-//import static de.ranagazoo.box.Box2dBuilder.createChainShape;
-//import static de.ranagazoo.box.Box2dBuilder.createFixtureDef;
-//import static de.ranagazoo.box.Box2dBuilder.createStaticBodyDef;
 
 import static de.ranagazoo.boxmap.Config.TS;
-
-import java.util.Random;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -32,16 +26,18 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Array;
-//import com.badlogic.gdx.physics.box2d.FixtureDef;
-//import com.badlogic.gdx.physics.box2d.Shape;
 
 public class BoxMap extends ApplicationAdapter
 {
 
-  public static final String TEXTURE_LIBGDX = "data/libgdx.png";
-  public static final String TEXTURE_ENTITIES = "data/entities-big.png";
-  public static final String TEXTURE_MECHA = "data/mecha32.png";
-  public static final String MAP_MAP = "data/map.tmx";
+//Avoid Enums, use final variables
+//Avoid Iterators, for-loops are faster
+//Avoid Global Static classes at all costs, their runtime differs from normal code
+  
+//1. Camera anpassen
+//2. Obstacle und Waypoint brauch kein render und kein move....
+//3. Waypoint-Polygons statt waypoints
+
 
   private OrthographicCamera cameraSprites;
   private OrthographicCamera cameraBox2dDebug;
@@ -62,7 +58,7 @@ public class BoxMap extends ApplicationAdapter
   private TiledMapRenderer mapRenderer;
   
   // My Objects
-  private Array<BoxEntity2> boxEntities;
+  private Array<BoxEntity> boxEntities;
 
   private DebugOutput debugOutput;
 
@@ -86,7 +82,7 @@ public class BoxMap extends ApplicationAdapter
     batch = new SpriteBatch();
     shapeRenderer = new ShapeRenderer();
 
-    Texture entitiesBigTexture = assetManager.get(TEXTURE_ENTITIES);
+    Texture entitiesBigTexture = assetManager.get(Config.TEXTURE_ENTITIES);
     entitiesBigTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);    
     
     playerSprite = new Sprite(new TextureRegion(entitiesBigTexture, 8 * TS, 1 * TS, TS, TS));
@@ -98,7 +94,7 @@ public class BoxMap extends ApplicationAdapter
     debugSprite.setOrigin(TS / 2, TS / 2);
 
 
-    Texture mechaTexture = assetManager.get(TEXTURE_MECHA);
+    Texture mechaTexture = assetManager.get(Config.TEXTURE_MECHA);
     mechaTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
     TextureRegion[] animationFrames = new TextureRegion[5];
@@ -113,13 +109,13 @@ public class BoxMap extends ApplicationAdapter
 
     stateTime = 0f;
     
-    map = assetManager.get(MAP_MAP);
+    map = assetManager.get(Config.MAP_MAP);
     mapRenderer = new OrthogonalTiledMapRenderer(map, 1f / 1f);
     mapRenderer.setView(cameraSprites);
     
 
     //Erzeuge Entities aus der Map
-    boxEntities = new Array<BoxEntity2>();
+    boxEntities = new Array<BoxEntity>();
     boxEntities.addAll(worldManager.loadEntities(map));
     
 
@@ -149,7 +145,7 @@ public class BoxMap extends ApplicationAdapter
       Gdx.app.exit();
 
     // Move all entities
-    for (BoxEntity2 boxEntity : boxEntities)
+    for (BoxEntity boxEntity : boxEntities)
     {
       boxEntity.move();
     }
@@ -167,7 +163,7 @@ public class BoxMap extends ApplicationAdapter
 //    Sie liefern Position, Drehung, Typ(Player/Entity) und Status(Attack/Idle) zurück.
 //    Gerendert wird hier anhand der Werte
 
-    for (BoxEntity2 boxEntity : boxEntities)
+    for (BoxEntity boxEntity : boxEntities)
     {
       Vector2 position = boxEntity.getBody().getPosition();
       float angle = boxEntity.getBody().getAngle();
@@ -201,7 +197,6 @@ public class BoxMap extends ApplicationAdapter
       debugSprite.draw(batch);
     }
     
-    
     //Render debug messages
     debugOutput.render(batch);
 
@@ -209,24 +204,11 @@ public class BoxMap extends ApplicationAdapter
 
     shapeRenderer.setProjectionMatrix(cameraSprites.combined);
     shapeRenderer.begin(ShapeType.Line);
-
-    
     shapeRenderer.polygon(worldManager.getWaypointGroup().getWaypointsRender());    
-    
-    
-//    for (int i = 0; i < waypoints.size() - 1; i++)
-//    {
-//      shapeRenderer.line(waypoints.get(i).getPosition().scl(32), waypoints.get(i + 1).getPosition().scl(32));
-//    }
-//    shapeRenderer.line(waypoints.get(waypoints.size() - 1).getPosition().scl(32), waypoints.get(0).getPosition().scl(32));
-
     shapeRenderer.end();
 
     worldManager.step();
     worldManager.render(cameraBox2dDebug.combined);
-//    world.step(1 / 60f, 6, 2);
-
-    //debugRenderer.render(world, cameraBox2dDebug.combined);
   }
 
   @Override
@@ -235,82 +217,17 @@ public class BoxMap extends ApplicationAdapter
     batch.dispose();
     shapeRenderer.dispose();
     assetManager.dispose();
-//    world.dispose();
-//    boxEntityFactory.dispose();
     worldManager.dispose();
   }
 
-//  public Vector2 getPlayerPosition()
-//  {
-//    for (BoxEntity2 boxEntity : boxEntities)
-//    {
-//      if (boxEntity.getClass() == Player.class)
-//        return ((Player) boxEntity).getBody().getPosition();
-//    }
-//    return new Vector2(0, 0);
-//  }
-
-//  // Return a temp random index, but not the given one
-//  public int getRandomWaypointIndex(int notThisOne)
-//  {
-//    int temp = random.nextInt(waypoints.size());
-//    while (notThisOne == temp)
-//    {
-//      temp = random.nextInt(waypoints.size());
-//    }
-//
-//    return temp;
-//  }
-
-//  public int getNextWaypointIndex(int currentone)
-//  {
-//    int temp = currentone + 1;
-//    if (temp >= waypoints.size())
-//      temp = 0;
-//    return temp;
-//  }
-
-  /*
-   * Siehe MapbObjetcs  SSSSS
-   * 
-   ** @param type class of the objects we want to retrieve
-   * @param fill collection to put the returned objects in
-   * @return array filled with all the objects in the collection matching type 
-  public <T extends MapObject> Array<T> getByType (Class<T> type, Array<T> fill) {
-    fill.clear();
-    for (int i = 0, n = objects.size; i < n; i++) {
-      MapObject object = objects.get(i);
-      if (ClassReflection.isInstance(type, object)) {
-        fill.add((T)object);
-      }
-    }
-    return fill;
-  }
-   */
-  
-  
-  
-//  Avoid Enums, use final variables
-//
-//  Avoid Iterators, for-loops are faster
-//
-//  Avoid Global Static classes at all costs, their runtime differs from normal code
-//
-//   
-  
-  
-//  public Waypoint getWaypoint(int parameter)
-//  {
-//    return waypoints.get(parameter);
-//  }
 
   public void loadAssets()
   {
-    assetManager.load(TEXTURE_LIBGDX, Texture.class);
-    assetManager.load(TEXTURE_ENTITIES, Texture.class);
-    assetManager.load(TEXTURE_MECHA, Texture.class);
+    assetManager.load(Config.TEXTURE_LIBGDX, Texture.class);
+    assetManager.load(Config.TEXTURE_ENTITIES, Texture.class);
+    assetManager.load(Config.TEXTURE_MECHA, Texture.class);
     assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
-    assetManager.load(MAP_MAP, TiledMap.class);
+    assetManager.load(Config.MAP_MAP, TiledMap.class);
     assetManager.finishLoading();
   }
 
@@ -319,32 +236,9 @@ public class BoxMap extends ApplicationAdapter
     return assetManager;
   }
 
-//  public World getWorld()
-//  {
-//    return world;
-//  }
-
   public Animation<TextureRegion> getAnimation()
   {
     return animation;
   }
 
-//  public TextureRegion getEntityPlayerRegion()
-//  {
-//    return entityPlayerRegion;
-//  }
-//  
-//  public ArrayList<Waypoint> getWaypoints()
-//  {
-//    return waypoints;
-//  }
-
-//  public BoxEntityFactory2 getBoxEntityFactory()
-//  {
-//    return boxEntityFactory;
-//  }
-//  public BoxEntityFactory getBoxEntityFactory()
-//  {
-//    return boxEntityFactory;
-//  }
 }
